@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annhub</title>
+    <title>Annhub - Internet Explorer</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='18' fill='%23070707'/%3E%3Ctext x='16' y='75' font-family='Arial, Helvetica, sans-serif' font-size='38' font-weight='800' fill='%23f2f2f2'%3EAnn%3C/text%3E%3Crect x='66' y='34' width='48' height='60' rx='10' fill='%23f8a11a'/%3E%3Ctext x='72' y='75' font-family='Arial, Helvetica, sans-serif' font-size='31' font-weight='900' fill='%23000000'%3Ehub%3C/text%3E%3C/svg%3E">
     
-    <!-- Fonts to match Cred aesthetic -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
@@ -27,18 +27,18 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Anton', 'sans-serif'],
-                        tech: ['Syncopate', 'sans-serif'],
+                        sans:    ['Tahoma', 'Arial', 'sans-serif'],
+                        display: ['Tahoma', 'Arial Black', 'sans-serif'],
+                        tech:    ['Tahoma', 'Arial', 'sans-serif'],
                     },
                     colors: {
-                        creddark: '#0a0a0a',
-                        credcard: '#121212',
-                        credacc: '#E2F979', // Cred-like neon accent
-                        credsec: '#FF5C00'
+                        creddark: '#d4d0c8',
+                        credcard: '#d4d0c8',
+                        credacc:  '#f8a11a',
+                        credsec:  '#0a246a'
                     },
                     boxShadow: {
-                        'neon': '0 0 20px rgba(226, 249, 121, 0.3)',
+                        'neon': '2px 2px 6px rgba(0,0,0,0.4)',
                     }
                 }
             }
@@ -47,292 +47,1539 @@
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="cursor_styles.css">
-</head>
-<body class="noise selection:bg-credacc selection:text-black">
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-40 bg-black/80 backdrop-blur-md border-b border-white/10 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="#" class="annhub-logo" aria-label="Go to landing page">
+    <style>
+        /* Inline Win2k tweaks */
+        body { font-family: Tahoma, Arial, sans-serif; font-size: 11px; }
+
+        /* IE-style window chrome wrapper */
+        .ie-window-chrome {
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #e8e4dc inset;
+        }
+
+        /* Fake Win2k title bar */
+        .ie-title-bar {
+            background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            gap: 6px;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .ie-title-text {
+            flex: 1;
+            font-weight: bold;
+            font-size: 11px;
+            color: #fff;
+            font-family: Tahoma, Arial, sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ie-window-btns {
+            display: flex;
+            gap: 2px;
+        }
+
+        .ie-win-btn {
+            width: 20px;
+            height: 18px;
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            font-size: 9px;
+            font-weight: bold;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: Tahoma, Arial, sans-serif;
+            flex-shrink: 0;
+        }
+
+        .ie-win-btn:active {
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+        }
+
+        /* Menu bar */
+        .ie-menubar {
+            background: #d4d0c8;
+            border-bottom: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            gap: 0;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .ie-menu-item {
+            padding: 2px 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #000;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        .ie-menu-item:hover {
+            background: #0a246a;
+            color: #fff;
+            border: 1px solid transparent;
+        }
+
+        /* IE Toolbar */
+        .ie-toolbar {
+            background: #d4d0c8;
+            border-bottom: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            padding: 3px 6px;
+            gap: 4px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .ie-tool-btn {
+            padding: 3px 10px;
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            font-size: 11px;
+            cursor: pointer;
+            color: #000;
+            font-family: Tahoma, Arial, sans-serif;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ie-tool-btn:hover { background: #e8e4dc; }
+        .ie-tool-btn:active {
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+        }
+        .ie-tool-sep {
+            width: 1px;
+            height: 24px;
+            background: #808080;
+            margin: 0 4px;
+            box-shadow: 1px 0 0 #fff;
+        }
+        .ie-address-label {
+            font-weight: bold;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+        .ie-address-input {
+            flex: 1;
+            background: #fff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-bottom: 2px solid #fff;
+            border-right: 2px solid #fff;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+            outline: none;
+        }
+
+        /* Status bar */
+        .ie-statusbar {
+            background: #d4d0c8;
+            border-top: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+            gap: 4px;
+            min-height: 22px;
+        }
+        .ie-status-panel {
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-bottom: 1px solid #fff;
+            border-right: 1px solid #fff;
+            padding: 1px 6px;
+        }
+
+        /* Window cards for sections */
+        .win-card {
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+        }
+
+        .win-inner-card {
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-bottom: 1px solid #e8e4dc;
+            border-right: 1px solid #e8e4dc;
+            background: #d4d0c8;
+        }
+
+        /* Buttons */
+        .win-button {
+            padding: 4px 14px;
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            font-size: 11px;
+            cursor: pointer;
+            color: #000;
+            font-family: Tahoma, Arial, sans-serif;
+            min-width: 75px;
+            text-align: center;
+            white-space: nowrap;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .win-button:hover { background: #e0dcd4; }
+        .win-button:active {
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+            padding: 5px 13px 3px 15px;
+        }
+        .win-button:disabled { color: #808080; cursor: default; }
+
+        /* Section groupbox style */
+        .win-groupbox {
+            border: 2px groove #808080;
+            padding: 12px 16px 16px;
+            position: relative;
+            background: #d4d0c8;
+            margin: 12px 0;
+        }
+        .win-groupbox-title {
+            position: absolute;
+            top: -9px;
+            left: 10px;
+            background: #d4d0c8;
+            padding: 0 6px;
+            font-weight: bold;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        /* Progress bar Win2k style */
+        .win-progress {
+            background: #ffffff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+            height: 20px;
+            overflow: hidden;
+        }
+        .win-progress-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #0a246a 0px,
+                #0a246a 8px,
+                transparent 8px,
+                transparent 10px
+            );
+            animation: progress-crawl 1.5s linear infinite;
+        }
+        @keyframes progress-crawl {
+            from { background-position: 0 0; }
+            to   { background-position: 100px 0; }
+        }
+
+        /* Tooltip balloon */
+        .win-tooltip {
+            background: #ffffe1;
+            border: 1px solid #000;
+            padding: 2px 5px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+            position: absolute;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* Dividers */
+        .win-sep-h {
+            border-top: 1px solid #808080;
+            border-bottom: 1px solid #fff;
+            height: 0;
+            margin: 8px 0;
+        }
+        .win-sep-v {
+            border-left: 1px solid #808080;
+            border-right: 1px solid #fff;
+            width: 0;
+            margin: 0 4px;
+        }
+
+        /* Desktop icon style */
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            width: 64px;
+            text-align: center;
+            user-select: none;
+        }
+        .desktop-icon-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .desktop-icon-label {
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 11px;
+            color: #fff;
+            text-shadow: 1px 1px 1px #000;
+            padding: 1px 2px;
+            line-height: 1.2;
+        }
+        .desktop-icon:hover .desktop-icon-label {
+            background: #0a246a;
+            color: #fff;
+            text-shadow: none;
+        }
+        .desktop-icon:hover .desktop-icon-icon {
+            outline: 1px dotted #fff;
+            filter: brightness(1.2);
+        }
+
+        /* Hero window */
+        .hero-main-window {
+            background: #d4d0c8;
+            border-top: 3px solid #ffffff;
+            border-left: 3px solid #ffffff;
+            border-bottom: 3px solid #404040;
+            border-right: 3px solid #404040;
+            max-width: 720px;
+            width: 90%;
+        }
+
+        /* Anime card as dialog */
+        .anime-card {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #ffffff !important;
+            border-left: 2px solid #ffffff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            height: auto !important;
+            min-height: 380px;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: visible !important;
+            transform: none !important;
+        }
+
+        .anime-card:hover {
+            transform: none !important;
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.4) !important;
+        }
+
+        .card-title-bar {
+            background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px 2px 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 20px;
+            flex-shrink: 0;
+        }
+
+        .card-title-bar .card-ctrl {
+            width: 16px;
+            height: 14px;
+            background: #d4d0c8;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-bottom: 1px solid #404040;
+            border-right: 1px solid #404040;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            margin-left: 1px;
+        }
+
+        .card-img-container {
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-bottom: 2px solid #fff;
+            border-right: 2px solid #fff;
+            overflow: hidden;
+            margin: 6px 6px 0;
+            flex-shrink: 0;
+            height: 220px;
+        }
+
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .anime-card:hover .card-img-container img {
+            transform: scale(1.05);
+        }
+
+        .card-info-area {
+            padding: 8px 8px 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-genre-tag {
+            background: #0a246a;
+            color: #fff;
+            font-size: 10px;
+            padding: 1px 5px;
+            display: inline-block;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .card-score-badge {
+            background: #f8a11a;
+            color: #000;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        /* Neko tiles */
+        .neko-tile {
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            padding: 4px;
+            cursor: pointer;
+        }
+        .neko-tile:hover { background: #c8c4bb; }
+        .neko-tile img {
+            display: block;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-bottom: 1px solid #fff;
+            border-right: 1px solid #fff;
+        }
+        .neko-tile-label {
+            font-size: 10px;
+            font-family: Tahoma, Arial, sans-serif;
+            padding: 3px 2px 1px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Load more buttons */
+        #load-more-btn, #load-more-quote-btn, #load-more-neko-btn {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #ffffff !important;
+            border-left: 2px solid #ffffff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            color: #000 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            padding: 5px 18px !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+            box-shadow: none !important;
+        }
+        #load-more-btn:hover, #load-more-quote-btn:hover, #load-more-neko-btn:hover {
+            background: #e0dcd4 !important;
+        }
+        #load-more-btn:active, #load-more-quote-btn:active, #load-more-neko-btn:active {
+            border-top: 2px solid #404040 !important;
+            border-left: 2px solid #404040 !important;
+            border-bottom: 2px solid #ffffff !important;
+            border-right: 2px solid #ffffff !important;
+        }
+
+        /* Loading state Win2k */
+        #loading-grid .loader, #neko-loading .loader {
+            border-color: #808080;
+            border-top-color: #0a246a;
+        }
+
+        /* Quote section as Notepad */
+        #quote-content {
+            background: #fff !important;
+            border-top: 2px solid #808080 !important;
+            border-left: 2px solid #808080 !important;
+            border-bottom: 2px solid #fff !important;
+            border-right: 2px solid #fff !important;
+            min-height: 120px !important;
+            font-family: 'Courier New', monospace !important;
+            padding: 12px !important;
+        }
+
+        #quote-text {
+            font-family: 'Courier New', Courier, monospace !important;
+            font-size: 14px !important;
+            font-style: italic;
+            color: #000 !important;
+        }
+
+        #quote-character {
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 13px !important;
+            font-weight: bold;
+            color: #0a246a !important;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+        }
+
+        #quote-anime {
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 10px !important;
+            color: #808080 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+        }
+
+        /* Remove quote marks (fa icons) */
+        .fa-quote-left, .fa-quote-right {
+            color: #c8c4bb !important;
+            font-size: 40px !important;
+        }
+
+        /* Famous quote section */
+        #famous-quote {
+            background: #d4d0c8 !important;
+        }
+        #scroll-reveal-text {
+            font-family: Tahoma, 'Arial Black', Arial, sans-serif !important;
+            font-size: clamp(1.5rem, 3.5vw, 3rem) !important;
+            color: #000 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+        }
+
+        /* Arcade */
+        #arcade {
+            background: #d4d0c8 !important;
+        }
+        #game-ui {
+            background: rgba(212, 208, 200, 0.95) !important;
+        }
+        #game-title {
+            font-family: Tahoma, 'Arial Black', Arial, sans-serif !important;
+            font-size: clamp(2rem, 4vw, 3rem) !important;
+            color: #000 !important;
+            letter-spacing: 0 !important;
+        }
+        #game-hud {
+            background: #d4d0c8 !important;
+            border: 2px solid #808080 !important;
+            color: #000 !important;
+            font-family: 'Courier New', monospace !important;
+            font-size: 12px !important;
+            padding: 4px 12px !important;
+        }
+        #score-display { color: #0a246a !important; font-weight: bold; }
+        #lives-display { color: #cc0000 !important; font-weight: bold; }
+
+        #game-over-ui {
+            background: #d4d0c8 !important;
+        }
+        #game-over-ui h2 { color: #cc0000 !important; font-size: 2.5rem !important; }
+        #final-score { color: #0a246a !important; }
+
+        /* Footer */
+        footer {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #808080 !important;
+            color: #000 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            letter-spacing: 0 !important;
+        }
+        footer a { color: #000 !important; text-decoration: none !important; }
+        footer a:hover { color: #0a246a !important; }
+
+        /* Error state */
+        .error-box {
+            background: #d4d0c8;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+            padding: 16px;
+        }
+        .error-title-bar {
+            background: linear-gradient(to right, #cc0000 0%, #ff6666 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 20px;
+            margin: -2px -2px 12px;
+        }
+
+        /* Remove neon effects */
+        * { text-shadow: none !important; }
+        h1.font-display .hero-main-text {
+            font-family: Tahoma, 'Arial Black', Arial, sans-serif !important;
+            color: #000 !important;
+        }
+
+        /* Hide animated gradient blobs */
+        .absolute.rounded-full.blur-\[120px\],
+        .absolute.rounded-full.blur-\[150px\],
+        .absolute.rounded-full.blur-\[100px\] {
+            display: none !important;
+        }
+
+        /* Remove noise grain */
+        .noise::before { display: none !important; }
+
+        /* Main sections bg */
+        main { background: #3a6ea5; }
+        section { background: #3a6ea5; }
+
+        /* The desktop wrapper around each section */
+        .win-desktop-section {
+            padding: 16px;
+            background: #3a6ea5;
+        }
+
+        /* Global overrides */
+        .bg-black { background: #d4d0c8 !important; }
+        .bg-credcard { background: #d4d0c8 !important; }
+        .bg-creddark { background: #d4d0c8 !important; }
+        .text-white { color: #000 !important; }
+        .text-gray-400 { color: #444 !important; }
+        .text-gray-500 { color: #808080 !important; }
+        .text-gray-600 { color: #808080 !important; }
+        .text-gray-700 { color: #808080 !important; }
+        .text-credacc { color: #f8a11a !important; }
+        .border-white\/10 { border-color: #808080 !important; }
+        .border-white\/20 { border-color: #808080 !important; }
+        .border-white\/5  { border-color: #808080 !important; }
+        .rounded-full, .rounded-xl, .rounded-2xl, .rounded-lg { border-radius: 0 !important; }
+        .backdrop-blur-md, .backdrop-blur-xl, .backdrop-blur-sm { backdrop-filter: none !important; }
+        .selection\:bg-credacc { background: #0a246a; }
+        ::selection { background: #0a246a; color: #fff; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 17px; }
+        ::-webkit-scrollbar-track { background: #d4d0c8; }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d0c8;
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+            border-bottom: 2px solid #404040;
+            border-right: 2px solid #404040;
+        }
+
+        /* Hero text override */
+        .text-huge {
+            font-size: clamp(2.5rem, 6vw, 5.5rem) !important;
+            line-height: 1.05 !important;
+            font-family: Tahoma, 'Arial Black', Arial, sans-serif !important;
+            font-weight: 900 !important;
+            letter-spacing: -0.01em !important;
+            color: #000 !important;
+        }
+
+        /* Nav overrides */
+        #navbar {
+            background: #d4d0c8 !important;
+            backdrop-filter: none !important;
+            border-bottom: 2px solid #808080 !important;
+            border-top: 2px solid #ffffff !important;
+            height: auto !important;
+        }
+
+        /* Nav login btn */
+        #navbar button.bg-white {
+            background: #d4d0c8 !important;
+            color: #000 !important;
+            border-top: 2px solid #ffffff !important;
+            border-left: 2px solid #ffffff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            padding: 4px 14px !important;
+        }
+        #navbar button.bg-white:hover { background: #e0dcd4 !important; color: #000 !important; }
+
+        /* Prev/Next buttons */
+        #prev-btn, #next-btn {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #ffffff !important;
+            border-left: 2px solid #ffffff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            width: 24px !important;
+            height: 24px !important;
+            color: #000 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        #prev-btn:disabled, #next-btn:disabled { color: #808080 !important; opacity: 1 !important; }
+        #prev-btn:hover:not(:disabled), #next-btn:hover:not(:disabled) { background: #e0dcd4 !important; }
+
+        /* Modal */
+        #player-modal {
+            clip-path: none !important;
+            transition: none !important;
+            background: rgba(0,0,0,0.6) !important;
+        }
+        #player-modal.active { clip-path: none !important; }
+        #player-modal > div {
+            background: #d4d0c8 !important;
+            border-top: 3px solid #fff !important;
+            border-left: 3px solid #fff !important;
+            border-bottom: 3px solid #404040 !important;
+            border-right: 3px solid #404040 !important;
+            border-radius: 0 !important;
+            max-height: 90vh;
+        }
+        #custom-controls {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #808080 !important;
+        }
+        #player-play-btn, #player-mute-btn, #player-cc-btn, #player-fs-btn { color: #000 !important; }
+        #player-play-btn:hover, #player-mute-btn:hover, #player-cc-btn:hover, #player-fs-btn:hover { color: #0a246a !important; }
+        #close-modal {
+            color: #000 !important;
+            background: #d4d0c8 !important;
+            border-top: 2px solid #fff !important;
+            border-left: 2px solid #fff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            font-size: 14px !important;
+            padding: 2px 8px !important;
+            border-radius: 0 !important;
+        }
+        #close-modal:hover { background: #cc0000 !important; color: #fff !important; }
+        #modal-title { color: #000 !important; font-size: 14px !important; }
+        #modal-synopsis { color: #444 !important; font-size: 11px !important; }
+        #modal-score { background: #f8a11a !important; color: #000 !important; font-size: 10px !important; }
+        #modal-status { color: #444 !important; }
+        #player-modal .border-l { border-left: 2px solid #808080 !important; background: #d4d0c8 !important; }
+        #player-modal h4 { color: #000 !important; font-size: 12px !important; }
+
+        /* Episode list */
+        .episode-item {
+            background: #d4d0c8 !important;
+            border: none !important;
+            border-bottom: 1px solid #808080 !important;
+            border-radius: 0 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            padding: 4px 8px !important;
+            color: #000 !important;
+        }
+        .episode-item:hover { background: #0a246a !important; color: #fff !important; }
+
+        /* Start game btn */
+        #start-game-btn, #restart-game-btn {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #fff !important;
+            border-left: 2px solid #fff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            color: #000 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            letter-spacing: 0 !important;
+            padding: 6px 18px !important;
+            box-shadow: none !important;
+        }
+        #start-game-btn:active, #restart-game-btn:active {
+            border-top: 2px solid #404040 !important;
+            border-left: 2px solid #404040 !important;
+            border-bottom: 2px solid #fff !important;
+            border-right: 2px solid #fff !important;
+        }
+
+        /* Dock items */
+        #dock-container .dock-item {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #fff !important;
+            border-left: 2px solid #fff !important;
+            border-bottom: 2px solid #404040 !important;
+            border-right: 2px solid #404040 !important;
+            border-radius: 0 !important;
+            color: #000 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            padding: 2px 8px !important;
+            min-width: 70px !important;
+            width: auto !important;
+            height: 26px !important;
+            margin: 0 1px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+        }
+        #dock-container .dock-item:hover {
+            background: #0a246a !important;
+            color: #fff !important;
+            border-color: transparent !important;
+        }
+        #dock-container .dock-tooltip {
+            background: #ffffe1 !important;
+            border: 1px solid #000 !important;
+            color: #000 !important;
+            font-family: Tahoma, Arial, sans-serif !important;
+            font-size: 11px !important;
+            border-radius: 0 !important;
+            padding: 2px 4px !important;
+        }
+
+        /* Marquee bar override */
+        .win-marquee-bar {
+            transform: none !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            font-size: 11px;
+        }
+
+        /* Loading error state */
+        #loading-grid .border-red-500\/30 {
+            background: #d4d0c8 !important;
+            border: 2px solid #cc0000 !important;
+            border-radius: 0 !important;
+        }
+
+        /* Quote loading overlay */
+        #quote-loading {
+            background: rgba(212,208,200,0.9) !important;
+            backdrop-filter: none !important;
+        }
+
+        /* Volume slider */
+        .slider-wrapper {
+            background: #d4d0c8 !important;
+            border-top: 2px solid #808080 !important;
+            border-left: 2px solid #808080 !important;
+            border-bottom: 2px solid #fff !important;
+            border-right: 2px solid #fff !important;
+            border-radius: 0 !important;
+        }
+        .slider-range { background: #0a246a !important; border-radius: 0 !important; }
+
+        /* Loader Win2k */
+        .loader {
+            border-color: #c8c4bb !important;
+            border-top-color: #0a246a !important;
+        }
+
+        /* annhub-logo overrides for dark nav */
+        .annhub-logo-left { color: #000 !important; }
+        .annhub-logo-right { background: #f8a11a !important; color: #000 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+         IE-style title bar + chrome (sticky top)
+         ============================================================ -->
+    <div class="ie-title-bar" style="position: sticky; top: 0; z-index: 100;">
+        <div style="width:16px;height:16px;background:#f8a11a;border-radius:2px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">A</div>
+        <span class="ie-title-text">Annhub - The Ultimate Anime Hub - Internet Explorer</span>
+        <div class="ie-window-btns">
+            <div class="ie-win-btn" title="Minimize">_</div>
+            <div class="ie-win-btn" title="Restore">&#9633;</div>
+            <div class="ie-win-btn" title="Close" style="font-size:11px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+        </div>
+    </div>
+
+    <!-- Navigation (Menu bar + Toolbar + Address bar) -->
+    <nav id="navbar" style="position:sticky;top:28px;z-index:40;background:#d4d0c8;border-bottom:1px solid #808080;">
+
+        <!-- Menu Bar -->
+        <div class="ie-menubar">
+            <span class="ie-menu-item" style="text-decoration:underline;">F<span>i</span>le</span>
+            <span class="ie-menu-item" style="text-decoration:underline;">E<span>d</span>it</span>
+            <span class="ie-menu-item" style="text-decoration:underline;">V<span>i</span>ew</span>
+            <span class="ie-menu-item" style="text-decoration:underline;">F<span>a</span>vorites</span>
+            <span class="ie-menu-item" style="text-decoration:underline;">T<span>o</span>ols</span>
+            <span class="ie-menu-item" style="text-decoration:underline;">H<span>e</span>lp</span>
+            <div style="flex:1;"></div>
+            <!-- Annhub logo in menubar -->
+            <a href="#" class="annhub-logo" aria-label="Go to landing page" style="margin-right:6px;text-decoration:none;">
                 <span class="annhub-logo-left">Ann</span>
                 <span class="annhub-logo-right">hub</span>
             </a>
-            
-            <!-- Dock Navigation -->
-            <div id="dock-container" class="hidden md:flex items-center gap-4 relative"></div>
+        </div>
 
-            <button class="bg-white text-black font-bold py-2 px-6 rounded-full text-sm hover:bg-credacc transition-colors font-tech">
-                LOGIN
+        <!-- Toolbar -->
+        <div class="ie-toolbar">
+            <div class="ie-tool-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </div>
+            <div class="ie-tool-btn" style="border-color:#808080;color:#808080;cursor:default;">
+                <i class="fa-solid fa-arrow-right"></i> Forward
+            </div>
+            <div class="ie-tool-btn">
+                <i class="fa-solid fa-stop"></i> Stop
+            </div>
+            <div class="ie-tool-btn">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+            </div>
+            <div class="ie-tool-btn">
+                <i class="fa-solid fa-house"></i> Home
+            </div>
+            <div class="ie-tool-sep"></div>
+
+            <!-- Dock Navigation buttons (injected by JS) -->
+            <div id="dock-container" class="hidden md:flex items-center gap-1"></div>
+
+            <div class="ie-tool-sep hidden md:block"></div>
+            <div style="flex:1;"></div>
+
+            <button class="ie-tool-btn" style="min-width:70px;justify-content:center;font-weight:bold;">
+                <i class="fa-solid fa-right-to-bracket"></i> LOGIN
             </button>
+        </div>
+
+        <!-- Address Bar -->
+        <div class="ie-toolbar" style="border-top:1px solid #808080;">
+            <span class="ie-address-label">Address</span>
+            <input class="ie-address-input" type="text" value="https://annhub.vercel.app/" readonly>
+            <div class="ie-tool-btn" style="font-size:11px;padding:2px 8px;">
+                <i class="fa-solid fa-arrow-right"></i> Go
+            </div>
+            <div style="width:22px;height:22px;background:#0a246a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:4px;flex-shrink:0;">
+                <i class="fa-solid fa-globe" style="color:#fff;font-size:11px;"></i>
+            </div>
         </div>
     </nav>
 
     <main>
-        <!-- Hero Section -->
-        <section class="min-h-screen flex items-center justify-center relative pt-20 overflow-hidden">
-            <!-- Abstract Background Elements -->
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-credacc/10 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[150px]"></div>
-            
-            <div class="relative z-10 w-full px-6 flex flex-col items-center text-center">
-                <div class="overflow-hidden mb-2">
-                    <h2 class="font-tech text-credacc tracking-[0.5em] text-sm md:text-base hero-text-anim opacity-0 transform translate-y-10">THE ULTIMATE ANIME HUB</h2>
+
+        <!-- ============================================================
+             HERO SECTION — Windows Desktop with featured window
+             ============================================================ -->
+        <section id="hero-section" class="min-h-screen flex flex-col items-center justify-center relative pt-4 overflow-hidden" style="background:#3a6ea5;padding:24px;">
+
+            <!-- Desktop Icons (top-left) -->
+            <div class="absolute top-4 left-4 flex flex-col gap-4 z-10">
+                <div class="desktop-icon" onclick="document.getElementById('discover').scrollIntoView({behavior:'smooth'})">
+                    <div class="desktop-icon-icon"><i class="fa-solid fa-tv" style="color:#fff;font-size:22px;"></i></div>
+                    <span class="desktop-icon-label">Top Anime</span>
                 </div>
-                
-                <h1 class="font-display text-huge text-white uppercase flex flex-col items-center">
-                    <span class="overflow-hidden block"><span class="block hero-main-text transform translate-y-full">STREAM.</span></span>
-                    <span class="overflow-hidden block" style="height: 0.9em; width: 100%; max-width: 1200px; padding: 0 40px;">
-                        <div id="discover-pressure" class="hero-main-text transform translate-y-full w-full h-full flex justify-center items-center"></div>
-                    </span>
-                    <span class="overflow-hidden block"><span class="block hero-main-text transform translate-y-full">CONQUER.</span></span>
-                </h1>
-                
-                <div class="mt-12 overflow-hidden">
-                    <a href="#discover" class="hero-btn opacity-0 inline-flex items-center gap-4 bg-credacc text-black font-display text-2xl px-10 py-4 rounded-full hover:bg-white transition-all transform hover:scale-105">
-                        START WATCHING <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                <div class="desktop-icon" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">
+                    <div class="desktop-icon-icon"><i class="fa-solid fa-images" style="color:#fff;font-size:22px;"></i></div>
+                    <span class="desktop-icon-label">Gallery</span>
+                </div>
+                <div class="desktop-icon" onclick="document.getElementById('arcade').scrollIntoView({behavior:'smooth'})">
+                    <div class="desktop-icon-icon"><i class="fa-solid fa-gamepad" style="color:#fff;font-size:22px;"></i></div>
+                    <span class="desktop-icon-label">Arcade</span>
+                </div>
+                <div class="desktop-icon" onclick="document.getElementById('quotes').scrollIntoView({behavior:'smooth'})">
+                    <div class="desktop-icon-icon"><i class="fa-solid fa-quote-left" style="color:#fff;font-size:22px;"></i></div>
+                    <span class="desktop-icon-label">Quotes</span>
                 </div>
             </div>
-            
-            <!-- Scroll Indicator -->
-            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-                <span class="font-tech text-[10px] tracking-widest uppercase">Scroll</span>
-                <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+
+            <!-- Main Hero "Window" -->
+            <div class="hero-main-window relative z-10">
+
+                <!-- Title Bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:28px;display:flex;align-items:center;padding:0 6px;gap:6px;user-select:none;">
+                    <div style="width:16px;height:16px;background:#f8a11a;border-radius:2px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">A</div>
+                    <span style="flex:1;font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Annhub — Welcome</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn">_</div>
+                        <div class="ie-win-btn">&#9633;</div>
+                        <div class="ie-win-btn" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
+                </div>
+
+                <!-- Menu bar inside window -->
+                <div class="ie-menubar" style="font-size:11px;">
+                    <span class="ie-menu-item">Stream</span>
+                    <span class="ie-menu-item">Discover</span>
+                    <span class="ie-menu-item">Community</span>
+                    <span class="ie-menu-item">Help</span>
+                </div>
+
+                <!-- Window content -->
+                <div style="padding:20px 24px 24px;background:#d4d0c8;">
+
+                    <!-- Eyebrow -->
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+                        <i class="fa-solid fa-circle-info" style="color:#0a246a;font-size:12px;"></i>
+                        <span style="font-size:11px;font-family:Tahoma,Arial,sans-serif;color:#444;font-style:italic;">THE ULTIMATE ANIME HUB — Est. 2025</span>
+                    </div>
+
+                    <!-- Big heading -->
+                    <div style="margin-bottom:16px;">
+                        <h1 class="font-display text-huge" style="color:#000;line-height:1.05;margin:0;">
+                            <span class="overflow-hidden block"><span class="block hero-main-text" style="transform:translateY(0);">STREAM.</span></span>
+                            <span class="overflow-hidden block" style="height:0.95em;width:100%;padding:0;">
+                                <div id="discover-pressure" class="hero-main-text w-full h-full flex justify-center items-start" style="transform:translateY(0);justify-content:flex-start;font-family:Tahoma,'Arial Black',Arial,sans-serif;font-weight:900;font-size:inherit;line-height:1.05;"></div>
+                            </span>
+                            <span class="overflow-hidden block"><span class="block hero-main-text" style="transform:translateY(0);">CONQUER.</span></span>
+                        </h1>
+                    </div>
+
+                    <div class="win-sep-h"></div>
+
+                    <!-- Description text -->
+                    <p style="font-size:11px;font-family:Tahoma,Arial,sans-serif;color:#444;margin:12px 0 16px;line-height:1.5;">
+                        Welcome to <strong>Annhub</strong> — your complete anime destination. Browse over 10,000 titles, read daily wisdom, explore our neko gallery, and test your reflexes in the arcade. <em>No ads. No limits.</em>
+                    </p>
+
+                    <!-- Action buttons -->
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <a href="#discover" class="hero-btn" style="text-decoration:none;">
+                            <button class="win-button" style="font-weight:bold;background:#d4d0c8;border-top:3px solid #000;border-left:3px solid #000;padding:5px 18px;">
+                                <i class="fa-solid fa-play"></i> Start Watching
+                            </button>
+                        </a>
+                        <button class="win-button">
+                            <i class="fa-solid fa-star"></i> Add to Favorites
+                        </button>
+                        <button class="win-button">
+                            <i class="fa-solid fa-circle-info"></i> About
+                        </button>
+                    </div>
+
+                    <div class="win-sep-h" style="margin-top:16px;"></div>
+
+                    <!-- Fake Win2k status / info bar inside window -->
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:10px;font-family:Tahoma,Arial,sans-serif;color:#808080;">
+                        <i class="fa-solid fa-circle" style="color:#008000;font-size:8px;"></i>
+                        <span>All services online</span>
+                        <span style="margin:0 4px;">|</span>
+                        <i class="fa-solid fa-film" style="font-size:10px;"></i>
+                        <span>10,000+ titles available</span>
+                        <span style="margin:0 4px;">|</span>
+                        <i class="fa-solid fa-signal" style="font-size:10px;"></i>
+                        <span>Jikan API: Connected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Taskbar-style bottom bar (decorative, desktop flavor) -->
+            <div class="absolute bottom-0 left-0 right-0" style="background:#d4d0c8;border-top:2px solid #808080;height:32px;display:flex;align-items:center;padding:0 6px;gap:6px;z-index:10;">
+                <div style="background:linear-gradient(to right,#2a6a2a,#4a8a4a);border-top:2px solid #8fd88f;border-left:2px solid #8fd88f;border-bottom:2px solid #1a4a1a;border-right:2px solid #1a4a1a;color:#fff;font-weight:bold;font-family:Tahoma,Arial,sans-serif;font-size:12px;padding:2px 12px;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                    <i class="fa-brands fa-windows" style="font-size:13px;"></i> Start
+                </div>
+                <div style="width:1px;height:20px;background:#808080;box-shadow:1px 0 0 #fff;margin:0 2px;"></div>
+                <div style="background:#c8c4bb;border-top:2px solid #808080;border-left:2px solid #808080;border-bottom:2px solid #fff;border-right:2px solid #fff;padding:2px 10px;font-size:11px;font-family:Tahoma,Arial,sans-serif;font-weight:bold;">
+                    <i class="fa-solid fa-tv" style="font-size:10px;margin-right:4px;"></i>Annhub — Welcome
+                </div>
+                <div style="flex:1;"></div>
+                <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #808080;border-left:1px solid #808080;border-bottom:1px solid #fff;border-right:1px solid #fff;padding:2px 8px;font-size:11px;font-family:Tahoma,Arial,sans-serif;height:24px;">
+                    <i class="fa-solid fa-volume-high" style="font-size:11px;"></i>
+                    <i class="fa-solid fa-network-wired" style="font-size:11px;"></i>
+                    <span id="taskbar-clock" style="font-size:11px;min-width:45px;text-align:right;">12:00</span>
+                </div>
             </div>
         </section>
 
-        <!-- Marquee Divider -->
-        <div class="bg-credacc text-black py-3 overflow-hidden whitespace-nowrap border-y border-white/20 transform -rotate-1 origin-left w-[110vw] -ml-5 z-20 relative">
-            <div class="inline-block font-display text-2xl tracking-wider uppercase animate-[marquee_20s_linear_infinite]">
-                &nbsp;NEW EPISODES EVERY DAY • HIGH QUALITY STREAMING • INTERACTIVE ARCADE • NO ADS • NO LIMITS • JOIN THE COMMUNITY • OVER 10,000 TITLES • 
-                NEW EPISODES EVERY DAY • HIGH QUALITY STREAMING • INTERACTIVE ARCADE • NO ADS • NO LIMITS • JOIN THE COMMUNITY • OVER 10,000 TITLES •
+        <!-- ============================================================
+             MARQUEE DIVIDER
+             ============================================================ -->
+        <div class="win-marquee-bar" style="overflow:hidden;white-space:nowrap;">
+            <div class="inline-block animate-[marquee_25s_linear_infinite]" style="font-family:Tahoma,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:0.05em;">
+                &nbsp;&#9658; NEW EPISODES EVERY DAY &nbsp;&#9658; HIGH QUALITY STREAMING &nbsp;&#9658; INTERACTIVE ARCADE &nbsp;&#9658; NO ADS &nbsp;&#9658; NO LIMITS &nbsp;&#9658; JOIN THE COMMUNITY &nbsp;&#9658; OVER 10,000 TITLES &nbsp;&nbsp;&nbsp;
+                &#9658; NEW EPISODES EVERY DAY &nbsp;&#9658; HIGH QUALITY STREAMING &nbsp;&#9658; INTERACTIVE ARCADE &nbsp;&#9658; NO ADS &nbsp;&#9658; NO LIMITS &nbsp;&#9658; JOIN THE COMMUNITY &nbsp;&#9658; OVER 10,000 TITLES &nbsp;
             </div>
         </div>
 
+        <!-- ============================================================
+             DISCOVER / TOP ANIME SECTION
+             ============================================================ -->
+        <section id="discover" class="win-desktop-section scroll-mt-20" style="background:#3a6ea5;padding:16px;">
 
-        <!-- Discover / API Section -->
-        <section id="discover" class="py-32 px-6 max-w-[1400px] mx-auto scroll-mt-20">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 relative z-30">
-                <div>
-                    <h2 class="font-display text-5xl md:text-7xl uppercase">Top Rated</h2>
-                    <p class="font-tech text-gray-400 tracking-widest text-sm mt-4">POWERED BY JIKAN API</p>
+            <!-- Section Window -->
+            <div class="win-card" style="max-width:1400px;margin:0 auto;">
+
+                <!-- Title bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:24px;display:flex;align-items:center;padding:0 6px;gap:6px;user-select:none;">
+                    <div style="width:14px;height:14px;background:#f8a11a;border-radius:2px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">TV</div>
+                    <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Top Rated Anime — Powered by Jikan API</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">_</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">&#9633;</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
                 </div>
-                <div class="flex gap-4">
-                    <button id="prev-btn" class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed">
+
+                <!-- Toolbar inside section -->
+                <div class="ie-menubar">
+                    <span class="ie-menu-item">View</span>
+                    <span class="ie-menu-item">Sort By</span>
+                    <span class="ie-menu-item">Filter</span>
+                    <div style="flex:1;"></div>
+                    <button id="prev-btn" class="ie-win-btn" style="width:22px;height:20px;font-size:11px;" disabled>
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
-                    <button id="next-btn" class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed">
+                    <button id="next-btn" class="ie-win-btn" style="width:22px;height:20px;font-size:11px;">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- Loading State -->
-            <div id="loading-grid" class="flex justify-center py-20 w-full">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-800 h-16 w-16"></div>
-            </div>
+                <div style="padding:12px;background:#d4d0c8;">
 
-            <!-- Anime Grid -->
-            <div id="anime-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 hidden">
-                <!-- Cards injected via JS -->
-            </div>
-
-            <!-- Load More Container -->
-            <div id="load-more-container" class="mt-16 flex justify-center w-full hidden">
-                <button id="load-more-btn" class="bg-transparent border-2 border-white/20 text-white hover:border-credacc hover:text-credacc font-tech tracking-[0.2em] px-8 py-4 uppercase transition-all rounded-full flex items-center gap-3">
-                    LOAD MORE ANIME <i class="fa-solid fa-arrow-down"></i>
-                </button>
-            </div>
-        </section>
-
-
-        <!-- Scroll Reveal Quote (One Piece) -->
-        <section id="famous-quote" class="min-h-[60vh] flex items-center justify-center py-20 px-6 relative overflow-hidden text-center bg-black">
-            <!-- Background element -->
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-            <div class="max-w-5xl mx-auto relative z-10">
-                <i class="fa-solid fa-quote-left text-4xl text-gray-700 mb-8 block"></i>
-                <h2 id="scroll-reveal-text" class="font-display text-4xl md:text-6xl lg:text-7xl leading-tight text-white uppercase tracking-wide">
-                    WANNA GAIN SOME KNOWLEDGE ?
-                </h2>
-                <!-- Source removed as requested -->
-            </div>
-        </section>
-
-        <!-- ANIME QUOTES SECTION -->
-        <section id="quotes" class="py-32 px-6 max-w-[1000px] mx-auto border-t border-white/10 relative scroll-mt-20">
-            <!-- Background Element -->
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-64 bg-credsec/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-            <div class="text-center mb-16 relative z-10">
-                <h2 class="font-display text-5xl md:text-7xl uppercase text-white">Daily Wisdom</h2>
-                <p class="font-tech text-credacc tracking-[0.3em] text-sm mt-4">POWERED BY ANIMECHAN API</p>
-            </div>
-
-            <div class="relative z-10 bg-credcard/60 backdrop-blur-md border border-white/10 rounded-2xl p-8 md:p-16 text-center shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden group hover:border-credacc/30 transition-colors duration-500">
-                <i class="fa-solid fa-quote-left text-[100px] md:text-[140px] absolute -top-6 -left-6 text-white/5 group-hover:text-credacc/10 transition-colors duration-500"></i>
-                <i class="fa-solid fa-quote-right text-[100px] md:text-[140px] absolute -bottom-6 -right-6 text-white/5 group-hover:text-credacc/10 transition-colors duration-500"></i>
-
-                <div id="quote-content" class="relative z-20 min-h-[150px] flex flex-col justify-center">
-                    <p id="quote-text" class="font-sans text-2xl md:text-4xl text-white italic leading-relaxed mb-8">"Connecting to the database..."</p>
-                    <h4 id="quote-character" class="font-display text-2xl text-credacc uppercase tracking-widest">System</h4>
-                    <p id="quote-anime" class="font-tech text-xs text-gray-500 tracking-[0.2em] mt-2 uppercase">Annhub Core</p>
-                </div>
-                
-                <div id="quote-loading" class="hidden absolute inset-0 bg-credcard/80 backdrop-blur-sm flex items-center justify-center z-30">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-credacc h-12 w-12"></div>
-                </div>
-            </div>
-
-            <div class="mt-12 flex justify-center w-full relative z-10">
-                <button id="load-more-quote-btn" class="bg-transparent border-2 border-white/20 text-white hover:border-credacc hover:text-credacc font-tech tracking-[0.2em] px-8 py-4 uppercase transition-all rounded-full flex items-center gap-3 hover:shadow-[0_0_15px_rgba(226,249,121,0.3)]">
-                    NEXT QUOTE <i class="fa-solid fa-rotate-right"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- NEKOS API Gallery Section -->
-        <section id="gallery" class="py-32 px-6 max-w-[1400px] mx-auto border-t border-white/10 relative scroll-mt-20">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 relative z-10">
-                <div>
-                    <h2 class="font-display text-5xl md:text-7xl uppercase text-white">Neko Gallery</h2>
-                    <p class="font-tech text-credacc tracking-[0.3em] text-sm mt-4">POWERED BY NEKOS.BEST API</p>
-                </div>
-            </div>
-
-            <!-- Neko Grid -->
-            <div id="neko-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-                <!-- Images injected via JS -->
-            </div>
-
-            <!-- Neko Loading State -->
-            <div id="neko-loading" class="flex justify-center py-10 hidden">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-credacc h-12 w-12"></div>
-            </div>
-
-            <!-- Load More Neko Container -->
-            <div class="mt-16 flex justify-center w-full relative z-10">
-                <button id="load-more-neko-btn" class="bg-credcard border border-white/20 text-white hover:border-credacc hover:text-credacc font-tech tracking-[0.2em] px-8 py-4 uppercase transition-all rounded-full flex items-center gap-3">
-                    LOAD MORE NEKOS <i class="fa-solid fa-arrow-down"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- Scope-Creep Inspired Arcade Section -->
-        <section id="arcade" class="min-h-screen relative bg-creddark border-t border-white/10 overflow-hidden flex flex-col scroll-mt-20">
-            <div class="absolute top-10 left-10 z-10 pointer-events-none">
-                <h2 class="font-display text-6xl md:text-8xl text-white opacity-10">ARCADE</h2>
-                <p class="font-tech text-credacc tracking-[0.3em] text-xs mt-2">ANNHUB // REFLEX TRAINING</p>
-            </div>
-
-            <!-- Game UI Overlay -->
-            <div class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none" id="game-ui">
-                <h3 class="font-display text-8xl text-white mb-4 pointer-events-auto" id="game-title">NEON STRIKE</h3>
-                <p class="font-mono text-gray-400 mb-8 pointer-events-auto text-center max-w-md">Click the neon targets before they disappear. Missing costs lives. Surviving increases speed.</p>
-                <button id="start-game-btn" class="pointer-events-auto bg-transparent border-2 border-credacc text-credacc hover:bg-credacc hover:text-black font-tech tracking-[0.2em] px-8 py-4 uppercase transition-all shadow-[0_0_15px_rgba(226,249,121,0.3)] hover:shadow-[0_0_30px_rgba(226,249,121,0.6)]">
-                    INITIATE SEQUENCE
-                </button>
-            </div>
-
-            <!-- HUD (Hidden initially) -->
-            <div id="game-hud" class="absolute top-6 right-6 z-20 hidden pointer-events-none flex gap-8 font-tech text-xl">
-                <div>SCORE: <span id="score-display" class="text-credacc">0</span></div>
-                <div>LIVES: <span id="lives-display" class="text-red-500">3</span></div>
-            </div>
-
-            <!-- Game Over UI -->
-            <div id="game-over-ui" class="absolute inset-0 bg-black/90 z-30 flex flex-col items-center justify-center hidden pointer-events-none">
-                <h2 class="font-display text-7xl text-red-500 mb-2 pointer-events-auto">SYSTEM FAILURE</h2>
-                <p class="font-tech text-white text-xl mb-8 pointer-events-auto">FINAL SCORE: <span id="final-score" class="text-credacc text-3xl">0</span></p>
-                <button id="restart-game-btn" class="pointer-events-auto bg-white text-black font-tech px-8 py-4 hover:bg-gray-200 transition-colors">
-                    REBOOT
-                </button>
-            </div>
-
-            <!-- Canvas Container -->
-            <canvas id="game-canvas" class="w-full h-full absolute inset-0"></canvas>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-black py-12 border-t border-white/10 text-center font-tech text-xs tracking-widest text-gray-600">
-            <div class="flex justify-center gap-6 mb-6 text-xl">
-                <a href="https://github.com/O-zayy" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors"><i class="fa-brands fa-github"></i></a>
-                <a href="https://www.linkedin.com/in/ojaswa-chauhan-812261381/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.instagram.com/ojaswa_chauhan770?igsh=b3Qyd2s0cWdnbzI5" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
-            </div>
-            <p>ANNHUB PLATFORM // STRICTLY FOR DEMONSTRATION // NO REAL STREAMING HAPPENS HERE</p>
-        </footer>
-    </main>
-
-    <!-- Video Player Modal -->
-    <div id="player-modal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 md:p-10 backdrop-blur-xl hidden">
-        <button id="close-modal" class="absolute top-6 right-6 text-white hover:text-credacc transition-colors text-3xl z-10">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-        
-        <div class="w-full max-w-6xl h-full max-h-[800px] flex flex-col lg:flex-row bg-credcard border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative">
-            
-            <!-- Video Area (iframe for trailer) -->
-            <div id="custom-player-wrapper" class="w-full lg:w-3/4 bg-black relative flex flex-col justify-center items-center group/player">
-                <div id="video-container" class="w-full aspect-video bg-zinc-900 flex items-center justify-center group-fullscreen/player:h-auto group-fullscreen/player:flex-grow">
-                    <!-- Iframe injected here -->
-                    <p class="text-gray-500 font-tech">LOADING STREAM...</p>
-                </div>
-                
-                <!-- Player Controls (Custom) -->
-                <div id="custom-controls" class="w-full h-20 bg-zinc-950 flex items-center px-6 border-t border-white/10 gap-4 transition-all duration-300 group-fullscreen/player:absolute group-fullscreen/player:bottom-0 group-fullscreen/player:w-full group-fullscreen/player:bg-black/80 group-fullscreen/player:backdrop-blur-md group-fullscreen/player:opacity-0 group-hover/player:opacity-100">
-                    <!-- Play/Pause -->
-                    <i id="player-play-btn" class="fa-solid fa-play text-xl text-white hover:text-credacc cursor-pointer transition-colors w-6"></i>
-                    
-                    <!-- Volume Area (Vertical Hover) -->
-                    <div class="relative group h-full flex items-center justify-center">
-                        <i id="player-mute-btn" class="fa-solid fa-volume-high text-lg text-white hover:text-credacc cursor-pointer transition-colors w-6 z-20 relative"></i>
-                        
-                        <!-- Elastic Volume Slider Container (Vertical Popup) -->
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 pb-4 pt-2 w-10 h-36 bg-zinc-900 border border-white/10 rounded-full flex flex-col items-center justify-center opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-10 shadow-2xl p-2 transform translate-y-2">
-                            <div id="volume-slider-root" class="w-full h-full relative flex items-center justify-center"></div>
+                    <!-- Loading State -->
+                    <div id="loading-grid" class="flex flex-col items-center justify-center py-10">
+                        <div style="margin-bottom:10px;font-family:Tahoma,Arial,sans-serif;font-size:11px;color:#444;">Loading anime data...</div>
+                        <div class="win-progress" style="width:300px;">
+                            <div class="win-progress-fill" style="width:100%;"></div>
                         </div>
                     </div>
 
-                    <!-- Time -->
-                    <span id="player-time" class="font-mono text-xs text-gray-400 min-w-[90px]">00:00 / 00:00</span>
+                    <!-- Anime Grid -->
+                    <div id="anime-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 hidden"></div>
 
-                    <!-- Progress Slider Area -->
-                    <div class="flex-grow relative h-12 flex items-center mx-2">
-                        <div id="progress-slider-root" class="w-full h-full relative flex items-center"></div>
+                    <!-- Load More Container -->
+                    <div id="load-more-container" class="mt-8 flex justify-center hidden">
+                        <button id="load-more-btn" class="win-button">
+                            Load More Anime <i class="fa-solid fa-arrow-down" style="font-size:9px;"></i>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Right Controls -->
-                    <div class="flex items-center gap-4 text-lg text-white">
-                        <i id="player-cc-btn" class="fa-solid fa-closed-captioning text-gray-600 hover:text-credacc cursor-pointer transition-colors" title="Toggle Captions"></i>
-                        <i id="player-fs-btn" class="fa-solid fa-expand hover:text-credacc cursor-pointer transition-colors"></i>
+                <!-- Status bar at bottom -->
+                <div class="ie-statusbar">
+                    <div class="ie-status-panel" style="flex:1;">Ready</div>
+                    <div class="ie-status-panel">Jikan API</div>
+                    <div class="ie-status-panel"><i class="fa-solid fa-circle" style="color:#008000;font-size:8px;"></i> Connected</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ============================================================
+             SCROLL REVEAL QUOTE (as a "Windows Message Box")
+             ============================================================ -->
+        <section id="famous-quote" class="win-desktop-section flex items-center justify-center py-12" style="background:#3a6ea5;">
+            <div class="win-card" style="max-width:700px;width:90%;">
+                <!-- Title bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:24px;display:flex;align-items:center;padding:0 6px;gap:6px;">
+                    <div style="width:14px;height:14px;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fa-solid fa-circle-question" style="color:#fff;"></i>
+                    </div>
+                    <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Message from Annhub</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
+                </div>
+                <!-- Content -->
+                <div style="padding:20px 24px 16px;background:#d4d0c8;display:flex;gap:16px;align-items:flex-start;">
+                    <div style="flex-shrink:0;">
+                        <i class="fa-solid fa-circle-question" style="font-size:40px;color:#0a246a;"></i>
+                    </div>
+                    <div style="flex:1;">
+                        <h2 id="scroll-reveal-text" style="font-family:Tahoma,'Arial Black',Arial,sans-serif;font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;color:#000;margin:0 0 16px;line-height:1.2;">
+                            WANNA GAIN SOME KNOWLEDGE?
+                        </h2>
+                        <p style="font-size:11px;font-family:Tahoma,Arial,sans-serif;color:#444;margin-bottom:16px;">
+                            Scroll down to discover daily anime wisdom, handpicked from the greatest series of all time.
+                        </p>
+                        <div style="display:flex;gap:6px;">
+                            <button class="win-button" style="border:3px solid #000;padding:3px 18px;font-weight:bold;" onclick="document.getElementById('quotes').scrollIntoView({behavior:'smooth'})">OK</button>
+                            <button class="win-button">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Info Sidebar -->
-            <div class="w-full lg:w-1/4 bg-credcard p-6 overflow-y-auto border-l border-white/5 flex flex-col">
-                <h3 id="modal-title" class="font-display text-3xl text-white uppercase mb-2 leading-none">Anime Title</h3>
-                <div class="flex items-center gap-3 mb-6 font-tech text-xs text-gray-400">
-                    <span id="modal-score" class="bg-credacc text-black px-2 py-1 font-bold rounded">9.5</span>
-                    <span id="modal-status">Airing</span>
+
+        <!-- ============================================================
+             ANIME QUOTES SECTION (Notepad style)
+             ============================================================ -->
+        <section id="quotes" class="win-desktop-section py-8 scroll-mt-20" style="background:#3a6ea5;">
+            <div class="win-card" style="max-width:900px;margin:0 auto;">
+
+                <!-- Title bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:24px;display:flex;align-items:center;padding:0 6px;gap:6px;">
+                    <div style="width:14px;height:14px;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fa-solid fa-file-lines" style="color:#fff;font-size:11px;"></i>
+                    </div>
+                    <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Daily Wisdom — Notepad [Powered by AnimeChan API]</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">_</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">&#9633;</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
                 </div>
-                
-                <p id="modal-synopsis" class="text-gray-400 text-sm mb-8 leading-relaxed font-sans"></p>
-                
-                <div class="mt-auto">
-                    <h4 class="font-display text-xl text-white mb-4 uppercase">Episodes</h4>
-                    <div class="space-y-2" id="episode-list">
-                        <!-- Dynamic Episodes inserted here -->
+
+                <!-- Notepad Menu bar -->
+                <div class="ie-menubar">
+                    <span class="ie-menu-item">File</span>
+                    <span class="ie-menu-item">Edit</span>
+                    <span class="ie-menu-item">Format</span>
+                    <span class="ie-menu-item">View</span>
+                    <span class="ie-menu-item">Help</span>
+                </div>
+
+                <!-- Notepad-like content area -->
+                <div style="padding:8px 12px 12px;background:#d4d0c8;">
+                    <div id="quote-content" class="relative" style="background:#fff;border-top:2px solid #808080;border-left:2px solid #808080;border-bottom:2px solid #fff;border-right:2px solid #fff;min-height:160px;padding:12px 16px;font-family:'Courier New',Courier,monospace;">
+                        <p id="quote-text" style="font-family:'Courier New',Courier,monospace;font-size:13px;font-style:italic;color:#000;line-height:1.6;margin-bottom:12px;">"Connecting to the database..."</p>
+                        <div style="border-top:1px solid #c8c4bb;padding-top:8px;">
+                            <h4 id="quote-character" style="font-family:Tahoma,Arial,sans-serif;font-size:12px;font-weight:bold;color:#0a246a;margin:0 0 2px;">System</h4>
+                            <p id="quote-anime" style="font-family:Tahoma,Arial,sans-serif;font-size:10px;color:#808080;margin:0;">Annhub Core</p>
+                        </div>
+
+                        <!-- Loading overlay -->
+                        <div id="quote-loading" class="hidden absolute inset-0 flex items-center justify-center z-30" style="background:rgba(212,208,200,0.9);">
+                            <div class="loader" style="border:3px solid #c8c4bb;border-top-color:#0a246a;border-radius:50%;width:32px;height:32px;animation:spinner 1s linear infinite;"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:8px;display:flex;justify-content:flex-end;">
+                        <button id="load-more-quote-btn" class="win-button">
+                            Next Quote <i class="fa-solid fa-rotate-right" style="font-size:9px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status bar -->
+                <div class="ie-statusbar">
+                    <div class="ie-status-panel" style="flex:1;">Ln 1, Col 1</div>
+                    <div class="ie-status-panel">AnimeChan API</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ============================================================
+             NEKO GALLERY (Windows Explorer view)
+             ============================================================ -->
+        <section id="gallery" class="win-desktop-section py-8 scroll-mt-20" style="background:#3a6ea5;">
+            <div class="win-card" style="max-width:1400px;margin:0 auto;">
+
+                <!-- Title bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:24px;display:flex;align-items:center;padding:0 6px;gap:6px;">
+                    <div style="width:14px;height:14px;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fa-regular fa-folder-open" style="color:#fff;font-size:11px;"></i>
+                    </div>
+                    <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Neko Gallery — Windows Explorer [Powered by Nekos.best API]</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">_</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">&#9633;</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
+                </div>
+
+                <!-- Explorer toolbar -->
+                <div class="ie-menubar">
+                    <span class="ie-menu-item">File</span>
+                    <span class="ie-menu-item">Edit</span>
+                    <span class="ie-menu-item">View</span>
+                    <span class="ie-menu-item">Favorites</span>
+                    <span class="ie-menu-item">Tools</span>
+                    <span class="ie-menu-item">Help</span>
+                </div>
+
+                <div style="padding:12px;background:#d4d0c8;">
+                    <!-- Location bar -->
+                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;padding:2px 4px;border-top:1px solid #808080;border-left:1px solid #808080;border-bottom:1px solid #fff;border-right:1px solid #fff;background:#d4d0c8;font-size:11px;font-family:Tahoma,Arial,sans-serif;">
+                        <i class="fa-regular fa-folder-open" style="color:#f8a11a;font-size:13px;"></i>
+                        <span style="color:#000;">C:\Annhub\Gallery\Neko\</span>
+                    </div>
+
+                    <!-- Neko Grid (tiles are injected by JS) -->
+                    <div id="neko-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2"></div>
+
+                    <!-- Loading -->
+                    <div id="neko-loading" class="flex flex-col items-center py-6 hidden">
+                        <div style="font-size:11px;font-family:Tahoma,Arial,sans-serif;color:#444;margin-bottom:8px;">Loading images...</div>
+                        <div class="win-progress" style="width:250px;"><div class="win-progress-fill" style="width:100%;"></div></div>
+                    </div>
+
+                    <div style="margin-top:10px;display:flex;justify-content:flex-end;">
+                        <button id="load-more-neko-btn" class="win-button">
+                            Load More <i class="fa-solid fa-arrow-down" style="font-size:9px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status bar -->
+                <div class="ie-statusbar">
+                    <div class="ie-status-panel" style="flex:1;">0 objects selected</div>
+                    <div class="ie-status-panel">Nekos.best API</div>
+                    <div class="ie-status-panel"><i class="fa-solid fa-circle" style="color:#008000;font-size:8px;"></i> Online</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ============================================================
+             ARCADE SECTION (as a game application window)
+             ============================================================ -->
+        <section id="arcade" class="min-h-screen relative overflow-hidden flex flex-col scroll-mt-20" style="background:#3a6ea5;padding:16px;">
+
+            <div class="win-card" style="flex:1;display:flex;flex-direction:column;min-height:80vh;max-width:1400px;width:100%;margin:0 auto;">
+
+                <!-- Title bar -->
+                <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:24px;display:flex;align-items:center;padding:0 6px;gap:6px;flex-shrink:0;">
+                    <div style="width:14px;height:14px;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fa-solid fa-gamepad" style="color:#fff;font-size:11px;"></i>
+                    </div>
+                    <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Neon Strike — Annhub Arcade</span>
+                    <div id="game-hud" class="hidden" style="background:transparent;border:none;padding:0;display:flex;gap:12px;font-size:11px;font-family:'Courier New',monospace;color:#fff;">
+                        <span>SCORE: <span id="score-display" style="color:#f8a11a;font-weight:bold;">0</span></span>
+                        <span>LIVES: <span id="lives-display" style="color:#ff8888;font-weight:bold;">3</span></span>
+                    </div>
+                    <div style="display:flex;gap:2px;">
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">_</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:8px;">&#9633;</div>
+                        <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                    </div>
+                </div>
+
+                <!-- Canvas area (sunken/inset) -->
+                <div style="flex:1;position:relative;background:#000;border-top:2px solid #808080;border-left:2px solid #808080;border-bottom:2px solid #fff;border-right:2px solid #fff;margin:8px;overflow:hidden;min-height:400px;">
+
+                    <!-- Game Canvas -->
+                    <canvas id="game-canvas" class="w-full h-full absolute inset-0" style="cursor:crosshair;"></canvas>
+
+                    <!-- Game UI Overlay -->
+                    <div class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none" id="game-ui" style="background:rgba(212,208,200,0.96);">
+                        <div class="win-card" style="max-width:400px;width:90%;pointer-events:auto;">
+                            <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+                                <i class="fa-solid fa-gamepad" style="color:#fff;font-size:10px;"></i>
+                                <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">New Game</span>
+                            </div>
+                            <div style="padding:16px 20px;background:#d4d0c8;display:flex;gap:12px;align-items:flex-start;">
+                                <i class="fa-solid fa-gamepad" style="font-size:32px;color:#0a246a;flex-shrink:0;"></i>
+                                <div>
+                                    <h3 id="game-title" style="font-family:Tahoma,'Arial Black',Arial,sans-serif;font-size:18px;font-weight:900;color:#000;margin:0 0 8px;">NEON STRIKE</h3>
+                                    <p style="font-family:Tahoma,Arial,sans-serif;font-size:11px;color:#444;margin:0 0 14px;line-height:1.5;">Click the neon targets before they disappear. Missing costs lives. Surviving increases speed.</p>
+                                    <div class="win-sep-h"></div>
+                                    <div style="margin-top:10px;display:flex;gap:6px;">
+                                        <button id="start-game-btn" class="win-button" style="border:3px solid #000;font-weight:bold;padding:4px 16px;">
+                                            <i class="fa-solid fa-play" style="font-size:9px;"></i> Start Game
+                                        </button>
+                                        <button class="win-button">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Over UI -->
+                    <div id="game-over-ui" class="absolute inset-0 z-30 flex flex-col items-center justify-center hidden pointer-events-none" style="background:rgba(212,208,200,0.97);">
+                        <div class="win-card" style="max-width:380px;width:90%;pointer-events:auto;">
+                            <div style="background:linear-gradient(to right,#cc0000 0%,#ff6666 100%);height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+                                <i class="fa-solid fa-triangle-exclamation" style="color:#fff;font-size:10px;"></i>
+                                <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">System Failure — Game Over</span>
+                                <div class="ie-win-btn" style="width:16px;height:14px;font-size:9px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</div>
+                            </div>
+                            <div style="padding:16px 20px;background:#d4d0c8;display:flex;gap:12px;align-items:flex-start;">
+                                <i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:#cc0000;flex-shrink:0;"></i>
+                                <div>
+                                    <h2 style="font-family:Tahoma,'Arial Black',Arial,sans-serif;font-size:16px;font-weight:900;color:#cc0000;margin:0 0 6px;">SYSTEM FAILURE</h2>
+                                    <p style="font-family:Tahoma,Arial,sans-serif;font-size:11px;color:#444;margin:0 0 4px;">A fatal error has occurred in the game process.</p>
+                                    <p style="font-family:'Courier New',monospace;font-size:12px;color:#000;margin:0 0 12px;">FINAL SCORE: <span id="final-score" style="color:#0a246a;font-weight:bold;font-size:16px;">0</span></p>
+                                    <div class="win-sep-h"></div>
+                                    <div style="margin-top:10px;display:flex;gap:6px;">
+                                        <button id="restart-game-btn" class="win-button" style="border:3px solid #000;font-weight:bold;padding:4px 14px;">
+                                            <i class="fa-solid fa-rotate" style="font-size:9px;"></i> Restart
+                                        </button>
+                                        <button class="win-button">Ignore</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arcade status bar -->
+                <div class="ie-statusbar" style="flex-shrink:0;">
+                    <div class="ie-status-panel" style="flex:1;">Ready</div>
+                    <div class="ie-status-panel">Annhub Arcade v1.0</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ============================================================
+             FOOTER
+             ============================================================ -->
+        <footer style="background:#d4d0c8;border-top:2px solid #808080;padding:16px 24px;font-family:Tahoma,Arial,sans-serif;font-size:11px;color:#000;">
+
+            <div style="max-width:1400px;margin:0 auto;">
+                <div class="win-sep-h"></div>
+
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+                    <a href="#" class="annhub-logo" style="text-decoration:none;">
+                        <span class="annhub-logo-left">Ann</span>
+                        <span class="annhub-logo-right">hub</span>
+                    </a>
+                    <div class="win-sep-v" style="height:20px;"></div>
+                    <div style="display:flex;gap:8px;">
+                        <a href="https://github.com/O-zayy" target="_blank" rel="noopener noreferrer" class="ie-tool-btn" style="padding:2px 8px;font-size:11px;text-decoration:none;color:#000;">
+                            <i class="fa-brands fa-github"></i> GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/ojaswa-chauhan-812261381/" target="_blank" rel="noopener noreferrer" class="ie-tool-btn" style="padding:2px 8px;font-size:11px;text-decoration:none;color:#000;">
+                            <i class="fa-brands fa-linkedin"></i> LinkedIn
+                        </a>
+                        <a href="https://www.instagram.com/ojaswa_chauhan770?igsh=b3Qyd2s0cWdnbzI5" target="_blank" rel="noopener noreferrer" class="ie-tool-btn" style="padding:2px 8px;font-size:11px;text-decoration:none;color:#000;">
+                            <i class="fa-brands fa-instagram"></i> Instagram
+                        </a>
+                    </div>
+                </div>
+
+                <div class="win-sep-h"></div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                    <p style="margin:0;color:#444;">ANNHUB PLATFORM // STRICTLY FOR DEMONSTRATION // NO REAL STREAMING HAPPENS HERE</p>
+                    <p style="margin:0;color:#808080;">&#169; 2025 Annhub. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+
+    <!-- ============================================================
+         VIDEO PLAYER MODAL (as a Win2k dialog)
+         ============================================================ -->
+    <div id="player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 hidden" style="background:rgba(0,0,0,0.6);">
+
+        <div class="w-full max-w-6xl flex flex-col" style="background:#d4d0c8;border-top:3px solid #fff;border-left:3px solid #fff;border-bottom:3px solid #404040;border-right:3px solid #404040;max-height:90vh;overflow:hidden;">
+
+            <!-- Modal Title Bar -->
+            <div style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);height:28px;display:flex;align-items:center;padding:0 6px;gap:6px;flex-shrink:0;user-select:none;">
+                <div style="width:16px;height:16px;background:#f8a11a;border-radius:2px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">A</div>
+                <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Annhub Media Player</span>
+                <div style="display:flex;gap:2px;">
+                    <div class="ie-win-btn">_</div>
+                    <div class="ie-win-btn">&#9633;</div>
+                    <button id="close-modal" class="ie-win-btn" style="font-size:11px;" onmouseenter="this.style.background='#cc0000';this.style.color='#fff';" onmouseleave="this.style.background='#d4d0c8';this.style.color='#000';">&#10005;</button>
+                </div>
+            </div>
+
+            <!-- Modal content -->
+            <div class="flex flex-col lg:flex-row" style="flex:1;overflow:hidden;max-height:calc(90vh - 28px);">
+
+                <!-- Video Area -->
+                <div id="custom-player-wrapper" class="w-full lg:w-3/4 flex flex-col group/player" style="background:#000;position:relative;">
+                    <div id="video-container" class="w-full flex-1 bg-zinc-900 flex items-center justify-center" style="aspect-ratio:16/9;min-height:200px;position:relative;">
+                        <p style="color:#808080;font-family:Tahoma,Arial,sans-serif;font-size:11px;">LOADING STREAM...</p>
+                    </div>
+
+                    <!-- Custom Controls -->
+                    <div id="custom-controls" class="w-full flex items-center px-4 border-t gap-3 transition-all" style="background:#d4d0c8;border-top:2px solid #808080;height:44px;flex-shrink:0;">
+                        <i id="player-play-btn" class="fa-solid fa-play cursor-pointer" style="color:#000;font-size:13px;width:16px;"></i>
+                        <div class="relative group h-full flex items-center">
+                            <i id="player-mute-btn" class="fa-solid fa-volume-high cursor-pointer" style="color:#000;font-size:13px;width:16px;z-index:20;position:relative;"></i>
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 pb-2 pt-2 w-8 h-28 flex flex-col items-center justify-center opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10" style="background:#d4d0c8;border-top:2px solid #fff;border-left:2px solid #fff;border-bottom:2px solid #404040;border-right:2px solid #404040;">
+                                <div id="volume-slider-root" class="w-full h-full relative flex items-center justify-center"></div>
+                            </div>
+                        </div>
+                        <span id="player-time" class="font-mono text-xs" style="color:#444;min-width:90px;font-family:'Courier New',monospace;font-size:10px;">00:00 / 00:00</span>
+                        <div class="flex-grow relative h-8 flex items-center mx-1">
+                            <div id="progress-slider-root" class="w-full h-full relative flex items-center"></div>
+                        </div>
+                        <div class="flex items-center gap-3" style="font-size:13px;">
+                            <i id="player-cc-btn" class="fa-solid fa-closed-captioning cursor-pointer" style="color:#808080;" title="Toggle Captions"></i>
+                            <i id="player-fs-btn" class="fa-solid fa-expand cursor-pointer" style="color:#000;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Sidebar -->
+                <div class="w-full lg:w-1/4 p-4 overflow-y-auto flex flex-col" style="border-left:2px solid #808080;background:#d4d0c8;">
+                    <h3 id="modal-title" style="font-family:Tahoma,'Arial Black',Arial,sans-serif;font-size:14px;font-weight:900;color:#000;margin:0 0 6px;line-height:1.2;">Anime Title</h3>
+                    <div class="flex items-center gap-2 mb-4" style="font-size:10px;font-family:Tahoma,Arial,sans-serif;">
+                        <span id="modal-score" style="background:#f8a11a;color:#000;padding:1px 6px;font-weight:bold;">9.5</span>
+                        <span id="modal-status" style="color:#444;">Airing</span>
+                    </div>
+                    <div class="win-sep-h"></div>
+                    <p id="modal-synopsis" style="color:#444;font-size:11px;margin:8px 0 16px;line-height:1.5;font-family:Tahoma,Arial,sans-serif;flex:1;"></p>
+                    <div class="win-sep-h"></div>
+                    <div style="margin-top:8px;">
+                        <h4 style="font-family:Tahoma,Arial,sans-serif;font-size:11px;font-weight:bold;color:#000;margin:0 0 6px;">Episodes</h4>
+                        <div id="episode-list" class="space-y-0"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TextPressure Component -->
+
+    <!-- Scripts -->
     <script src="api_fallbacks.js"></script>
     <script src="script.js"></script>
+
+    <!-- Clock updater -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const h = now.getHours().toString().padStart(2,'0');
+            const m = now.getMinutes().toString().padStart(2,'0');
+            const el = document.getElementById('taskbar-clock');
+            if(el) el.textContent = h + ':' + m;
+        }
+        updateClock();
+        setInterval(updateClock, 10000);
+    </script>
 </body>
 </html>
