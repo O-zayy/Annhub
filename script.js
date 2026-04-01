@@ -42,11 +42,11 @@ document.addEventListener('mouseover', (e) => {
 // --- GSAP Animations (Cred Style) ---
 gsap.registerPlugin(ScrollTrigger);
 
-// Hero Init Animation
+// Hero Init Animation (Win2k: subtle fade-in only, no slide)
 const tl = gsap.timeline();
-tl.to(".hero-text-anim", {y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.2})
-    .to(".hero-main-text", {y: 0, duration: 1, stagger: 0.15, ease: "power4.out"}, "-=0.4")
-    .to(".hero-btn", {opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)"}, "-=0.2");
+tl.to(".hero-text-anim", {y: 0, opacity: 1, duration: 0.3, ease: "none", delay: 0.1})
+    .to(".hero-main-text", {y: 0, opacity: 1, duration: 0.3, stagger: 0.05, ease: "none"}, "-=0.1")
+    .to(".hero-btn", {opacity: 1, scale: 1, duration: 0.2, ease: "none"}, "-=0.1");
 
 // Navbar blur effect on scroll
 window.addEventListener('scroll', () => {
@@ -88,7 +88,7 @@ async function fetchTopAnime(page = 1, append = false) {
         loadingGrid.classList.remove('hidden');
     } else {
         if(loadMoreBtn) {
-            loadMoreBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOADING...';
+            loadMoreBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="font-size:9px;"></i> Loading...';
             loadMoreBtn.disabled = true;
         }
     }
@@ -143,23 +143,34 @@ async function fetchTopAnime(page = 1, append = false) {
 
         if(!append) {
             loadingGrid.classList.remove('hidden');
-            // Robust error fallback for the dreaded Jikan 429 Too Many Requests
+            // Win2k style error box
             loadingGrid.innerHTML = `
-                <div class="flex flex-col items-center justify-center text-center p-8 border border-red-500/30 rounded-xl bg-red-500/10">
-                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-4"></i>
-                    <p class="text-red-400 font-display text-2xl uppercase">CONNECTION FAILED</p>
-                    <p class="text-gray-400 font-tech text-xs mt-2 mb-6">ALL API SERVICES ARE CURRENTLY UNREACHABLE.</p>
-                    <button onclick="fetchTopAnime(${page}, false)" class="border-2 border-credacc text-credacc px-6 py-3 text-xs font-tech tracking-widest hover:bg-credacc hover:text-black transition-colors rounded-full uppercase">REBOOT CONNECTION</button>
-                    <p class="text-[10px] text-gray-500 mt-2">FALLBACK ATTEMPT FAILED</p>
+                <div style="background:#d4d0c8;border-top:2px solid #fff;border-left:2px solid #fff;border-bottom:2px solid #404040;border-right:2px solid #404040;max-width:480px;width:90%;">
+                    <div style="background:linear-gradient(to right,#cc0000 0%,#ff6666 100%);height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color:#fff;font-size:10px;"></i>
+                        <span style="font-weight:bold;font-size:11px;color:#fff;font-family:Tahoma,Arial,sans-serif;flex:1;">Connection Error</span>
+                    </div>
+                    <div style="padding:16px 20px;display:flex;gap:12px;align-items:flex-start;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:#cc0000;flex-shrink:0;"></i>
+                        <div>
+                            <p style="font-family:Tahoma,Arial,sans-serif;font-size:12px;font-weight:bold;color:#000;margin:0 0 6px;">CONNECTION FAILED</p>
+                            <p style="font-family:Tahoma,Arial,sans-serif;font-size:11px;color:#444;margin:0 0 12px;">All API services are currently unreachable. Please try again.</p>
+                            <div style="border-top:1px solid #808080;border-bottom:1px solid #fff;height:0;margin:8px 0;"></div>
+                            <div style="margin-top:10px;display:flex;gap:6px;">
+                                <button onclick="fetchTopAnime(${page}, false)" style="padding:4px 14px;background:#d4d0c8;border-top:3px solid #000;border-left:3px solid #000;border-bottom:2px solid #404040;border-right:2px solid #404040;font-size:11px;cursor:pointer;font-family:Tahoma,Arial,sans-serif;font-weight:bold;">Retry</button>
+                                <button style="padding:4px 14px;background:#d4d0c8;border-top:2px solid #fff;border-left:2px solid #fff;border-bottom:2px solid #404040;border-right:2px solid #404040;font-size:11px;cursor:pointer;font-family:Tahoma,Arial,sans-serif;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         } else {
-            if(loadMoreBtn) loadMoreBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> RETRY LOAD';
+            if(loadMoreBtn) loadMoreBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i> Retry Load';
         }
     } finally {
         isFetching = false;
         if(loadMoreBtn && !loadMoreBtn.innerHTML.includes('RETRY')) {
-            loadMoreBtn.innerHTML = 'LOAD MORE ANIME <i class="fa-solid fa-arrow-down"></i>';
+            loadMoreBtn.innerHTML = 'Load More Anime <i class="fa-solid fa-arrow-down" style="font-size:9px;"></i>';
             loadMoreBtn.disabled = false;
         }
     }
@@ -181,7 +192,8 @@ function renderAnimeCards(animeList, append) {
 
     validAnime.forEach((anime, index) => {
         const card = document.createElement('div');
-        card.className = 'anime-card bg-credcard rounded-xl overflow-hidden border border-white/5 relative cursor-pointer group h-[400px] flex flex-col';
+        card.className = 'anime-card cursor-pointer group';
+        card.style.cssText = 'background:#d4d0c8;border-top:2px solid #fff;border-left:2px solid #fff;border-bottom:2px solid #404040;border-right:2px solid #404040;display:flex;flex-direction:column;min-height:360px;';
         
         // Store accurate data required for Modal & API queries
         card.dataset.id = anime.mal_id;
@@ -192,25 +204,34 @@ function renderAnimeCards(animeList, append) {
         card.dataset.trailer = anime.trailer?.embed_url || '';
 
         card.innerHTML = `
-            <div class="h-[70%] relative overflow-hidden">
-                <img src="${anime.images.webp.large_image_url}" alt="${anime.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                <div class="absolute inset-0 card-img-overlay"></div>
-                <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                    <i class="fa-solid fa-star text-credacc text-xs"></i>
-                    <span class="font-tech text-xs text-white">${anime.score || 'N/A'}</span>
+            <!-- Win2k Title Bar -->
+            <div class="card-title-bar" style="background:linear-gradient(to right,#0a246a 0%,#a6caf0 100%);color:#fff;font-size:10px;font-weight:bold;padding:2px 5px 2px 4px;display:flex;align-items:center;gap:3px;min-height:19px;flex-shrink:0;font-family:Tahoma,Arial,sans-serif;user-select:none;">
+                <div style="width:12px;height:12px;background:#f8a11a;border-radius:1px;font-size:7px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;">A</div>
+                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${anime.title}</span>
+                <div style="width:14px;height:12px;background:#d4d0c8;border-top:1px solid #fff;border-left:1px solid #fff;border-bottom:1px solid #404040;border-right:1px solid #404040;font-size:7px;display:flex;align-items:center;justify-content:center;color:#000;">&#10005;</div>
+            </div>
+            <!-- Image (sunken/inset) -->
+            <div class="card-img-container" style="border-top:2px solid #808080;border-left:2px solid #808080;border-bottom:2px solid #fff;border-right:2px solid #fff;overflow:hidden;margin:5px 5px 0;height:200px;flex-shrink:0;background:#000;position:relative;">
+                <img src="${anime.images.webp.large_image_url}" alt="${anime.title}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;display:block;" loading="lazy">
+                <!-- Score badge -->
+                <div style="position:absolute;top:4px;right:4px;background:#f8a11a;color:#000;font-size:10px;font-weight:bold;padding:1px 5px;font-family:Tahoma,Arial,sans-serif;display:flex;align-items:center;gap:2px;">
+                    <i class="fa-solid fa-star" style="font-size:8px;"></i>
+                    ${anime.score || 'N/A'}
                 </div>
             </div>
-            <div class="p-6 h-[30%] flex flex-col justify-between relative bg-credcard z-10 transition-transform duration-300 group-hover:-translate-y-4">
-                <h3 class="font-display text-xl uppercase leading-tight truncate text-white group-hover:text-credacc transition-colors">${anime.title}</h3>
-                <div class="flex items-center justify-between mt-2">
-                    <span class="font-sans text-xs text-gray-400 border border-white/20 px-2 py-1 rounded">${anime.genres[0]?.name || 'Anime'}</span>
-                    <span class="font-tech text-[10px] tracking-wider text-credacc uppercase group-hover:animate-pulse">WATCH NOW</span>
+            <!-- Info area -->
+            <div class="card-info-area" style="padding:6px 8px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;">
+                <h3 style="font-family:Tahoma,'Arial Black',Arial,sans-serif;font-size:12px;font-weight:900;color:#000;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${anime.title}</h3>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="background:#0a246a;color:#fff;font-size:9px;padding:1px 5px;font-family:Tahoma,Arial,sans-serif;">${anime.genres[0]?.name || 'Anime'}</span>
+                    <span style="font-family:Tahoma,Arial,sans-serif;font-size:9px;color:#0a246a;font-weight:bold;">&#9654; Watch</span>
                 </div>
-                
-                <!-- Hover Synopsis Reveal -->
-                <div class="absolute top-full left-0 w-full p-6 bg-credcard border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-full">
-                    <p class="text-xs text-gray-400 synopsis">${anime.synopsis || 'No details available.'}</p>
-                </div>
+                <p class="synopsis" style="font-family:Tahoma,Arial,sans-serif;font-size:10px;color:#444;margin:0;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${anime.synopsis || 'No details available.'}</p>
+            </div>
+            <!-- Card status bar -->
+            <div style="background:#d4d0c8;border-top:1px solid #808080;padding:2px 6px;display:flex;align-items:center;justify-content:space-between;font-size:10px;font-family:Tahoma,Arial,sans-serif;color:#808080;flex-shrink:0;">
+                <span>${anime.status || 'Unknown'}</span>
+                <span style="color:#0a246a;font-weight:bold;cursor:pointer;">Click to open &#9658;</span>
             </div>
         `;
 
@@ -1092,7 +1113,7 @@ async function fetchNekos() {
     isFetchingNekos = true;
     
     if(loadMoreNekoBtn) {
-        loadMoreNekoBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOADING...';
+        loadMoreNekoBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="font-size:9px;"></i> Loading...';
     }
     nekoLoading.classList.remove('hidden');
 
@@ -1104,18 +1125,27 @@ async function fetchNekos() {
         if(data.results) {
             data.results.forEach(neko => {
                 const card = document.createElement('div');
-                card.className = 'rounded-xl overflow-hidden border border-white/5 relative group aspect-square cursor-pointer api-card';
+                card.className = 'neko-tile cursor-pointer group';
+                card.style.cssText = 'background:#d4d0c8;border-top:2px solid #fff;border-left:2px solid #fff;border-bottom:2px solid #404040;border-right:2px solid #404040;padding:4px;display:flex;flex-direction:column;';
                 
                 card.innerHTML = `
-                    <img src="${neko.url}" alt="Neko" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    <div class="absolute inset-0 card-img-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                        <span class="font-tech text-[10px] text-credacc uppercase tracking-wider">ARTIST: ${neko.artist_name || 'UNKNOWN'}</span>
+                    <div style="border-top:1px solid #808080;border-left:1px solid #808080;border-bottom:1px solid #fff;border-right:1px solid #fff;overflow:hidden;flex:1;">
+                        <img src="${neko.url}" alt="Neko illustration" style="display:block;width:100%;height:160px;object-fit:cover;transition:transform 0.3s ease;" loading="lazy">
+                    </div>
+                    <div style="padding:3px 2px 1px;font-family:Tahoma,Arial,sans-serif;font-size:10px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;">
+                        <i class="fa-regular fa-image" style="font-size:9px;color:#808080;margin-right:3px;"></i>${neko.artist_name || 'Unknown Artist'}
                     </div>
                 `;
 
                 card.addEventListener('click', () => {
                     sounds.click();
                     window.open(neko.source_url, '_blank');
+                });
+                card.addEventListener('mouseenter', () => {
+                    card.style.background = '#c0bcb4';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.background = '#d4d0c8';
                 });
 
                 nekoGrid.appendChild(card);
@@ -1128,7 +1158,7 @@ async function fetchNekos() {
         isFetchingNekos = false;
         nekoLoading.classList.add('hidden');
         if(loadMoreNekoBtn) {
-            loadMoreNekoBtn.innerHTML = 'LOAD MORE NEKOS <i class="fa-solid fa-arrow-down"></i>';
+            loadMoreNekoBtn.innerHTML = 'Load More <i class="fa-solid fa-arrow-down" style="font-size:9px;"></i>';
         }
     }
 }
@@ -1621,15 +1651,15 @@ window.addEventListener('load', () => {
         text: 'DISCOVER.',
         width: true,
         weight: true,
-        italic: true,
+        italic: false,
         alpha: false,
         flex: true,
         stroke: true,
         scale: false,
-        textColor: 'transparent',
-        strokeColor: 'rgba(255,255,255,0.7)',
-        strokeWidth: '1.5px', // Thicker Stroke
-        minFontSize: 60 // Balanced size
+        textColor: '#000000',
+        strokeColor: 'rgba(0,0,0,0.5)',
+        strokeWidth: '1px',
+        minFontSize: 60
     });
     
     // Clean layout fix

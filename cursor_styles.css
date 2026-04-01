@@ -1,91 +1,45 @@
+/* Windows 2000 Cursor Theme — default arrow cursor */
 
-/* Target Cursor */
+/* Restore the regular cursor */
 html, body, * {
-  cursor: none !important; /* Force hide everywhere */
+    cursor: default !important;
 }
 
-.target-cursor-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  overflow: visible; /* Ensure dot is seen outside */
-  pointer-events: none;
-  z-index: 2147483647; /* Standard max z-index */
-  mix-blend-mode: difference; /* Difference for visibility on light/dark */
+a, button, [role="button"], .cursor-pointer,
+.dock-item, .anime-card, .neko-tile, .ie-menu-item,
+.ie-tool-btn, .win-button, .desktop-icon {
+    cursor: pointer !important;
 }
 
-.target-cursor-dot {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: #E2F979; /* Cred Accent */
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  box-shadow: 0 0 15px rgba(226, 249, 121, 0.9);
-  z-index: 2;
+input, textarea, select {
+    cursor: text !important;
 }
 
-.target-cursor-corner {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background-color: #E2F979;
-  pointer-events: none;
-  box-shadow: 0 0 8px rgba(226, 249, 121, 0.6);
-  z-index: 1;
+canvas#game-canvas {
+    cursor: crosshair !important;
 }
 
-.target-cursor-corner.corner-tl,
-.target-cursor-corner.corner-tr,
-.target-cursor-corner.corner-br,
-.target-cursor-corner.corner-bl {
-  width: 12px;
-  height: 12px;
-  border-style: solid;
-  border-color: #E2F979;
+/* Win2k selection style */
+::selection {
+    background: #0a246a;
+    color: #ffffff;
 }
 
-.target-cursor-corner.corner-tl {
-  border-width: 2px 0 0 2px;
-  transform: translate(0, 0);
-}
-
-.target-cursor-corner.corner-tr {
-  border-width: 2px 2px 0 0;
-  transform: translate(-100%, 0);
-}
-
-.target-cursor-corner.corner-br {
-  border-width: 0 2px 2px 0;
-  transform: translate(-100%, -100%);
-}
-
-.target-cursor-corner.corner-bl {
-  border-width: 0 0 2px 2px;
-  transform: translate(0, -100%);
-}
-
-/* Discover Text Hover - TextPressure uses spans */
+/* Discover Text Hover */
 #discover-pressure span {
-  transition: color 0.3s ease, -webkit-text-stroke-color 0.3s ease;
-  pointer-events: none; /* Let parent handle clicks if any */
-  will-change: color, text-shadow;
+    transition: none;
+    pointer-events: none;
 }
 
 #discover-pressure:hover span {
-  color: #E2F979 !important; /* credacc yellow */
-  -webkit-text-stroke-color: #E2F979 !important;
-  opacity: 1 !important;
-  text-shadow: 0 0 20px rgba(226, 249, 121, 0.5);
+    color: #0a246a !important;
+    -webkit-text-stroke-color: transparent !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
 }
 
-/* Make sure the clickable area is maintained over the spans */
 #discover-pressure {
     position: relative;
     z-index: 20;
-    pointer-events: auto !important; /* Important for hover */
-    /* Ensure the container has size */
+    pointer-events: auto !important;
 }
