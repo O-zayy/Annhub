@@ -10,6 +10,77 @@ body {
     overflow-x: hidden;
 }
 
+/* Custom cursor */
+html,
+body,
+* {
+    cursor: none !important;
+}
+
+.target-cursor-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 2147483647;
+    mix-blend-mode: difference;
+}
+
+.target-cursor-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #E2F979;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(226, 249, 121, 0.9);
+    z-index: 2;
+}
+
+.target-cursor-corner {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: #E2F979;
+    pointer-events: none;
+    box-shadow: 0 0 8px rgba(226, 249, 121, 0.6);
+    z-index: 1;
+}
+
+.target-cursor-corner.corner-tl,
+.target-cursor-corner.corner-tr,
+.target-cursor-corner.corner-br,
+.target-cursor-corner.corner-bl {
+    width: 12px;
+    height: 12px;
+    border-style: solid;
+    border-color: #E2F979;
+}
+
+.target-cursor-corner.corner-tl {
+    border-width: 2px 0 0 2px;
+    transform: translate(0, 0);
+}
+
+.target-cursor-corner.corner-tr {
+    border-width: 2px 2px 0 0;
+    transform: translate(-100%, 0);
+}
+
+.target-cursor-corner.corner-br {
+    border-width: 0 2px 2px 0;
+    transform: translate(-100%, -100%);
+}
+
+.target-cursor-corner.corner-bl {
+    border-width: 0 0 2px 2px;
+    transform: translate(0, -100%);
+}
+
 /* Annhub lockup inspired by a split wordmark treatment */
 .annhub-logo {
     display: inline-flex;
@@ -73,17 +144,6 @@ body {
     letter-spacing: -0.02em;
 }
 
-.text-outline {
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(255,255,255,0.2);
-}
-
-.text-outline:hover {
-    color: var(--accent);
-    -webkit-text-stroke: 1px var(--accent);
-    transition: all 0.3s ease;
-}
-
 /* Card Hover Effects */
 .anime-card, .api-card {
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
@@ -128,11 +188,6 @@ body {
     clip-path: circle(150% at 50% 50%);
 }
 
-/* Game Canvas Container */
-#game-container {
-    cursor: crosshair;
-}
-
 /* Loading Spinner */
 .loader {
     border-top-color: var(--accent);
@@ -166,15 +221,6 @@ body {
     z-index: 20;
     pointer-events: auto !important; /* Important for hover */
     /* Ensure the container has size */
-}
-
-/* Dock Navigation Styles - Added */
-.dock-container {
-    padding: 0 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .dock-item {
@@ -351,14 +397,6 @@ body {
     width: 100%;
     top: auto;
     bottom: 0;
-}
-
-.value-indicator {
-    position: absolute;
-    top: -20px;
-    font-family: inherit;
-    font-size: 10px;
-    color: #888;
 }
 
 /* --- YouTube Branding Hider (Crop Technique) --- */

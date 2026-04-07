@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050505">
     <title>Annhub</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='18' fill='%23070707'/%3E%3Ctext x='16' y='75' font-family='Arial, Helvetica, sans-serif' font-size='38' font-weight='800' fill='%23f2f2f2'%3EAnn%3C/text%3E%3Crect x='66' y='34' width='48' height='60' rx='10' fill='%23f8a11a'/%3E%3Ctext x='72' y='75' font-family='Arial, Helvetica, sans-serif' font-size='31' font-weight='900' fill='%23000000'%3Ehub%3C/text%3E%3C/svg%3E">
     
@@ -46,7 +47,6 @@
     </script>
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="cursor_styles.css">
 </head>
 <body class="noise selection:bg-credacc selection:text-black">
 
@@ -124,6 +124,56 @@
                     <button id="next-btn" class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
+                </div>
+            </div>
+
+            <!-- Search, Filter, Sort Controls -->
+            <div class="mb-10 p-4 md:p-5 bg-credcard/70 border border-white/10 rounded-2xl backdrop-blur-md">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="anime-search" class="block font-tech text-[10px] tracking-[0.2em] text-gray-400 mb-2 uppercase">Search</label>
+                        <input id="anime-search" type="text" placeholder="Search by title..." class="w-full h-12 px-4 rounded-xl bg-black/50 border border-white/20 text-white placeholder:text-gray-500 focus:outline-none focus:border-credacc transition-colors">
+                    </div>
+                    <div>
+                        <label for="language-filter" class="block font-tech text-[10px] tracking-[0.2em] text-gray-400 mb-2 uppercase">Language</label>
+                        <select id="language-filter" class="w-full h-12 px-4 rounded-xl bg-black/50 border border-white/20 text-white focus:outline-none focus:border-credacc transition-colors">
+                            <option value="original">Original / Sub</option>
+                            <option value="english">English Dub</option>
+                            <option value="hindi">Hindi Dub</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="genre-filter" class="block font-tech text-[10px] tracking-[0.2em] text-gray-400 mb-2 uppercase">Genre</label>
+                        <select id="genre-filter" class="w-full h-12 px-4 rounded-xl bg-black/50 border border-white/20 text-white focus:outline-none focus:border-credacc transition-colors">
+                            <option value="all">All Genres</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status-filter" class="block font-tech text-[10px] tracking-[0.2em] text-gray-400 mb-2 uppercase">Status</label>
+                        <select id="status-filter" class="w-full h-12 px-4 rounded-xl bg-black/50 border border-white/20 text-white focus:outline-none focus:border-credacc transition-colors">
+                            <option value="all">All Status</option>
+                            <option value="airing">Airing</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="sort-filter" class="block font-tech text-[10px] tracking-[0.2em] text-gray-400 mb-2 uppercase">Sort</label>
+                        <select id="sort-filter" class="w-full h-12 px-4 rounded-xl bg-black/50 border border-white/20 text-white focus:outline-none focus:border-credacc transition-colors">
+                            <option value="none">No Sort (API Order)</option>
+                            <option value="score-desc">Score: High to Low</option>
+                            <option value="score-asc">Score: Low to High</option>
+                            <option value="title-asc">Title: A to Z</option>
+                            <option value="title-desc">Title: Z to A</option>
+                        </select>
+                    </div>
+                    <div class="flex md:justify-end items-end">
+                        <button id="clear-filters-btn" class="w-full md:w-auto h-12 px-6 rounded-xl border border-white/20 text-white hover:border-credacc hover:text-credacc font-tech text-xs tracking-[0.2em] uppercase transition-colors">
+                            Clear Filters
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -321,8 +371,15 @@
                 
                 <p id="modal-synopsis" class="text-gray-400 text-sm mb-8 leading-relaxed font-sans"></p>
                 
-                <div class="mt-auto">
-                    <h4 class="font-display text-xl text-white mb-4 uppercase">Episodes</h4>
+                <div class="mt-auto flex-shrink-0">
+                    <div class="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
+                        <h4 class="font-display text-xl text-white uppercase leading-none">Episodes</h4>
+                        <select id="modal-language-filter" class="bg-black border border-white/20 text-gray-300 font-tech text-[10px] tracking-wider rounded px-2 py-1 uppercase outline-none focus:border-credacc cursor-pointer hover:bg-white/5 transition-colors">
+                            <option value="original">Sub / Orig</option>
+                            <option value="english">English Dub</option>
+                            <option value="hindi">Hindi Dub</option>
+                        </select>
+                    </div>
                     <div class="space-y-2" id="episode-list">
                         <!-- Dynamic Episodes inserted here -->
                     </div>

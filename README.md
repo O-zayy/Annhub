@@ -1,38 +1,92 @@
-# Annhub // Anime & Play
+# Annhub Frontend
 
-## 📌 Project Overview
-Annhub is a premium, highly interactive web application designed for anime discovery and entertainment. Built with a sleek, dark-themed "Cred-inspired" aesthetic, the platform allows users to explore top-rated anime, read iconic character quotes, and browse visual galleries. 
+A single-page anime showcase app using HTML, CSS, and vanilla JavaScript with API-backed content.
 
-Beyond standard data fetching, Annhub is engineered for high resilience. It features a custom-built, multi-tiered API fallback system to ensure the application remains functional even if the primary data sources experience downtime or rate-limiting. The UI is further enhanced with custom WebGL background effects (LightRays), canvas-based interaction sparks, and an integrated mini-arcade game.
+## Implemented Enhancements
+- Debounced search input for smoother filtering updates.
+- Throttled infinite scroll auto-load for anime list expansion.
+- Local storage persistence for discover search/filter/sort preferences.
+- Beginner-friendly UI logic for filters, modal playback, and load more behavior.
 
-## ⚙️ APIs Utilized
-This project aggregates content using a robust combination of public APIs:
-* **Jikan API / AniList GraphQL (Primary):** Used for fetching comprehensive anime data, including top-rated series, synopses, scores, and trailer embeds.
-* **Fallback Cascade:** If the primary fetch fails, the system automatically cascades through **Kitsu API** and **Shikimori API**, finally defaulting to a curated **Hardcoded Dataset** to guarantee zero downtime.
-* **Animechan API:** Powers the "Daily Wisdom" section, serving random, database-driven anime quotes.
-* **Nekos.best API:** Populates the interactive character image gallery.
+## Development Standards
 
-## 🚀 Planned Features (Upcoming Milestones)
-While the core fetching, fallback architecture, and UI foundation are implemented, upcoming milestones will introduce advanced data manipulation:
+### 1. Make Regular Commits
+- Commit in small, logical chunks.
+- Use clear, action-based commit messages.
+- Examples:
+  - `feat: add anime search and filter controls`
+  - `feat: implement sorting by score and title`
+  - `fix: handle API fallback errors in anime loader`
+  - `refactor: split anime render and query logic`
 
-* **Dynamic Search:** A real-time search bar allowing users to query specific anime titles across the integrated APIs.
-* **Advanced Filtering:** Users will be able to filter the main discovery grid by parameters such as Genre (Action, Romance, Sci-Fi) and Status (Releasing, Finished).
-* **Sorting Mechanisms:** Capability to sort the anime grid dynamically by Highest Rated, Most Popular, and Newest Releases.
-* **Interactive Media Player:** A custom-built, immersive modal overlay for viewing anime trailers with custom volume sliders and progress controls.
-* **Expanded Arcade Module:** Enhancements to "Neon Strike", the built-in canvas reflex training game tied to the platform's neon aesthetic.
+### 2. Follow Clean Code Practices
+- Keep functions short and focused on one responsibility.
+- Use consistent indentation and spacing.
+- Prefer early returns to reduce nesting.
+- Remove dead/commented code before merging.
 
-## 💻 Technologies Involved
-* **Frontend:** HTML5, modern CSS3
-* **Styling:** Tailwind CSS (via CDN for rapid styling), Custom CSS for targeted animations and custom target-cursors.
-* **Logic & State:** Vanilla JavaScript (ES6+), utilizing the Fetch API, Promises, and `async/await` for asynchronous data handling.
-* **Animations & Effects:** * GSAP (GreenSock) for smooth scroll triggers and element reveals.
-  * HTML `<canvas>` API for interactive click sparks.
-  * OGL (Minimal WebGL) for the dynamic, mouse-tracking light rays hero background.
+### 3. Use Meaningful Names
+- Prefer descriptive identifiers over abbreviations.
+- Good examples:
+  - `loadedAnimeList`
+  - `updateGenreFilterOptions`
+  - `renderNoResultsState`
+- Avoid vague names like `data2`, `temp`, `x`.
 
-## 🛠️ Setup and Installation
-This project is built with static web technologies and requires no heavy build steps or package managers.
+### 4. Avoid Code Repetition (DRY)
+- Reuse helper functions for shared behavior.
+- Centralize repeated logic (normalization, sorting, filtering, rendering).
+- If a pattern appears 2+ times, extract it.
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/yourusername/annhub.git](https://github.com/yourusername/annhub.git)
-   
+### 5. Maintain Proper Structure
+Separate concerns inside `script.js` using clear sections:
+- API fetching and fallback logic
+- State management
+- UI rendering
+- Event wiring
+
+If complexity grows, split into files:
+- `api.js` for API/fallback functions
+- `anime-state.js` for query and pagination state
+- `anime-render.js` for DOM rendering
+- `anime-events.js` for listeners and interactions
+
+### 6. Handle Errors Gracefully
+- Wrap API calls in `try/catch`.
+- Show user-friendly fallback UI on failures.
+- Handle empty API payloads safely.
+- Avoid crashes on missing fields by validating data.
+
+### 7. Ensure Responsiveness
+- Test commonly used breakpoints before commit:
+  - Mobile: 360px-480px
+  - Tablet: 768px
+  - Laptop/Desktop: 1024px+
+- Confirm discover controls, cards, and modal layout are usable on small screens.
+
+### 8. Keep README Updated
+Update this file when you change:
+- Features
+- Setup/run steps
+- Project structure
+- Known limitations and future improvements
+
+### 9. Write Modular Code
+- Break large logic into reusable, pure helper functions where possible.
+- Keep DOM manipulation functions separate from data transformation functions.
+- Prefer passing data into functions instead of relying on hidden globals.
+
+## Current Project Structure
+- `index.html`: page structure and UI sections
+- `style.css`: custom styles
+- `script.js`: app logic (animation, API integration, rendering, controls)
+- `api_fallbacks.js`: backup API chain logic
+
+## Lightweight Pre-Commit Checklist
+- [ ] Feature works end-to-end
+- [ ] No console errors
+- [ ] API errors handled safely
+- [ ] UI checked on mobile + desktop
+- [ ] Names are descriptive
+- [ ] No duplicated logic introduced
+- [ ] README updated (if behavior/structure changed)

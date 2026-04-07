@@ -34,7 +34,14 @@ const sounds = {
 
 // UI Sound Attachments
 document.addEventListener('mouseover', (e) => {
-    if(e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('.anime-card') || e.target.closest('.episode-item') || e.target.closest('.api-card') || e.target.closest('#quote-container')) {
+    const isInteractive =
+        e.target.tagName === 'A' ||
+        e.target.tagName === 'BUTTON' ||
+        e.target.closest('.anime-card') ||
+        e.target.closest('.episode-item') ||
+        e.target.closest('.api-card');
+
+    if (isInteractive) {
         sounds.hover();
     }
 });
@@ -67,9 +74,303 @@ const loadMoreBtn = document.getElementById('load-more-btn');
 const loadMoreContainer = document.getElementById('load-more-container');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
+const animeSearchInput = document.getElementById('anime-search');
+const genreFilter = document.getElementById('genre-filter');
+const statusFilter = document.getElementById('status-filter');
+const sortFilter = document.getElementById('sort-filter');
+const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
 let currentPage = 1;
 let isFetching = false;
+let loadedAnimeList = [];
+let hasNextAnimePage = true;
+
+const ANIME_FILTERS_STORAGE_KEY = 'annhub-anime-filters-v1';
+
+function debounce(fn, delay = 250) {
+    let timeoutId = null;
+    return (...args) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+}
+
+function throttle(fn, wait = 700) {
+    let lastRun = 0;
+    return (...args) => {
+        const now = Date.now();
+        if (now - lastRun < wait) return;
+        lastRun = now;
+        fn(...args);
+    };
+}
+
+const animeQueryState = {
+    search: '',
+    genre: 'all',
+    status: 'all',
+    sort: 'score-desc',
+    language: 'original'
+};
+
+function readSavedAnimeFilters() {
+    try {
+        const raw = localStorage.getItem(ANIME_FILTERS_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return null;
+
+        return {
+            search: typeof parsed.search === 'string' ? parsed.search : '',
+            genre: typeof parsed.genre === 'string' ? parsed.genre : 'all',
+            status: typeof parsed.status === 'string' ? parsed.status : 'all',
+            sort: typeof parsed.sort === 'string' ? parsed.sort : 'score-desc',
+            language: typeof parsed.language === 'string' ? parsed.language : 'original'
+        };
+    } catch (error) {
+        console.warn('Unable to read saved filters:', error);
+        return null;
+    }
+}
+
+function saveAnimeFilters() {
+    try {
+        localStorage.setItem(ANIME_FILTERS_STORAGE_KEY, JSON.stringify(animeQueryState));
+    } catch (error) {
+        console.warn('Unable to save filters:', error);
+    }
+}
+
+function applySavedAnimeFiltersToState() {
+    const saved = readSavedAnimeFilters();
+    if (!saved) return;
+
+    animeQueryState.search = saved.search;
+    animeQueryState.genre = saved.genre;
+    animeQueryState.status = saved.status;
+    animeQueryState.sort = saved.sort;
+    animeQueryState.language = saved.language;
+}
+
+function syncAnimeControlsFromState() {
+    if (animeSearchInput) animeSearchInput.value = animeQueryState.search;
+    if (statusFilter) statusFilter.value = animeQueryState.status;
+    if (sortFilter) sortFilter.value = animeQueryState.sort;
+    if (genreFilter) genreFilter.value = animeQueryState.genre;
+    
+    const languageFilter = document.getElementById('language-filter');
+    if (languageFilter) languageFilter.value = animeQueryState.language;
+}
+
+function normalizeAnimeStatus(statusText = '') {
+    const normalized = String(statusText).toLowerCase();
+    if (normalized.includes('air') || normalized.includes('releasing') || normalized.includes('current')) return 'airing';
+    if (normalized.includes('finish') || normalized.includes('completed')) return 'finished';
+    return 'other';
+}
+
+function getAnimeScoreValue(score) {
+    const parsed = Number.parseFloat(score);
+    return Number.isFinite(parsed) ? parsed : -1;
+}
+
+function getAnimeGenres(anime) {
+    if (!anime || !Array.isArray(anime.genres)) return [];
+    return anime.genres
+        .map((g) => g?.name)
+        .filter(Boolean);
+}
+
+function updateGenreFilterOptions() {
+    if (!genreFilter) return;
+
+    const selected = animeQueryState.genre || 'all';
+    const genres = new Set();
+
+    loadedAnimeList.forEach((anime) => {
+        getAnimeGenres(anime).forEach((genreName) => genres.add(genreName));
+    });
+
+    const sortedGenres = Array.from(genres).sort((a, b) => a.localeCompare(b));
+
+    genreFilter.innerHTML = '<option value="all">All Genres</option>';
+    sortedGenres.forEach((genreName) => {
+        const option = document.createElement('option');
+        option.value = genreName.toLowerCase();
+        option.textContent = genreName;
+        genreFilter.appendChild(option);
+    });
+
+    const hasSelectedGenre = Array.from(genreFilter.options).some((option) => option.value === selected);
+    genreFilter.value = hasSelectedGenre ? selected : 'all';
+    animeQueryState.genre = genreFilter.value;
+}
+
+function getFilteredAndSortedAnime() {
+    const searchNeedle = animeQueryState.search.trim().toLowerCase();
+
+    const filtered = loadedAnimeList.filter((anime) => {
+        const title = String(anime?.title || '').toLowerCase();
+        const titleEng = String(anime?.title_english || '').toLowerCase();
+        const titleJp = String(anime?.title_japanese || '').toLowerCase();
+        const animeStatus = normalizeAnimeStatus(anime?.status);
+        const animeGenres = getAnimeGenres(anime).map((g) => g.toLowerCase());
+
+        const matchesSearch = !searchNeedle || 
+                              title.includes(searchNeedle) || 
+                              titleEng.includes(searchNeedle) || 
+                              titleJp.includes(searchNeedle);
+        const matchesStatus = animeQueryState.status === 'all' || animeStatus === animeQueryState.status;
+        const matchesGenre = animeQueryState.genre === 'all' || animeGenres.includes(animeQueryState.genre);
+
+        return matchesSearch && matchesStatus && matchesGenre;
+    });
+
+    filtered.sort((a, b) => {
+        if (animeQueryState.sort === 'none') {
+            return 0;
+        }
+        if (animeQueryState.sort === 'score-asc') {
+            return getAnimeScoreValue(a?.score) - getAnimeScoreValue(b?.score);
+        }
+        if (animeQueryState.sort === 'title-asc') {
+            return String(a?.title || '').localeCompare(String(b?.title || ''));
+        }
+        if (animeQueryState.sort === 'title-desc') {
+            return String(b?.title || '').localeCompare(String(a?.title || ''));
+        }
+        return getAnimeScoreValue(b?.score) - getAnimeScoreValue(a?.score);
+    });
+
+    return filtered;
+}
+
+function renderNoResultsState() {
+    animeGrid.classList.remove('hidden');
+    animeGrid.style.minHeight = 'auto';
+    animeGrid.innerHTML = `
+        <div class="col-span-full border border-white/10 rounded-2xl bg-credcard/80 p-10 text-center">
+            <i class="fa-solid fa-magnifying-glass text-2xl text-gray-500 mb-4"></i>
+            <p class="font-display text-2xl uppercase text-white">No anime found</p>
+            <p class="font-tech text-[11px] tracking-[0.15em] text-gray-400 mt-3 uppercase">Try a different search, genre, or sort option.</p>
+        </div>
+    `;
+}
+
+function renderAnimeByQuery() {
+    const visibleAnime = getFilteredAndSortedAnime();
+    if (visibleAnime.length === 0) {
+        renderNoResultsState();
+        return;
+    }
+    renderAnimeCardsList(visibleAnime);
+}
+
+function wireAnimeControls() {
+    const runSearchUpdate = debounce((value) => {
+        animeQueryState.search = value;
+        saveAnimeFilters();
+        currentPage = 1;
+        fetchTopAnime(currentPage, false);
+    }, 500);
+
+    if (animeSearchInput) {
+        animeSearchInput.addEventListener('input', (event) => {
+            runSearchUpdate(event.target.value);
+        });
+    }
+
+    if (genreFilter) {
+        genreFilter.addEventListener('change', (event) => {
+            animeQueryState.genre = event.target.value;
+            saveAnimeFilters();
+            renderAnimeByQuery();
+        });
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', (event) => {
+            animeQueryState.status = event.target.value;
+            saveAnimeFilters();
+            renderAnimeByQuery();
+        });
+    }
+
+    if (sortFilter) {
+        sortFilter.addEventListener('change', (event) => {
+            animeQueryState.sort = event.target.value;
+            saveAnimeFilters();
+            renderAnimeByQuery();
+        });
+    }
+
+    const languageFilter = document.getElementById('language-filter');
+    if (languageFilter) {
+        languageFilter.addEventListener('change', (event) => {
+            sounds.hover();
+            animeQueryState.language = event.target.value;
+            saveAnimeFilters();
+
+            // If modal is open, apply language switch immediately.
+            if (modal && !modal.classList.contains('hidden')) {
+                const modalLanguageFilter = document.getElementById('modal-language-filter');
+                if (modalLanguageFilter) modalLanguageFilter.value = animeQueryState.language;
+
+                const activeEpisode = document.querySelector('.episode-item.border-credacc') || document.querySelector('.episode-item');
+                if (activeEpisode) activeEpisode.click();
+            }
+        });
+    }
+
+    const modalLanguageFilter = document.getElementById('modal-language-filter');
+    if (modalLanguageFilter) {
+        modalLanguageFilter.addEventListener('change', (event) => {
+            sounds.hover();
+            animeQueryState.language = event.target.value;
+            saveAnimeFilters();
+            
+            // Keep main dropdown in sync
+            if (languageFilter) languageFilter.value = event.target.value;
+
+            // Immediately simulate a click on the active episode or the first one to reload video
+            const activeEpisode = document.querySelector('.episode-item.border-credacc') || document.querySelector('.episode-item');
+            if (activeEpisode) {
+                activeEpisode.click();
+            }
+        });
+    }
+
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            animeQueryState.search = '';
+            animeQueryState.genre = 'all';
+            animeQueryState.status = 'all';
+            animeQueryState.sort = 'score-desc';
+            animeQueryState.language = 'original';
+
+            if (animeSearchInput) animeSearchInput.value = '';
+            if (genreFilter) genreFilter.value = 'all';
+            if (statusFilter) statusFilter.value = 'all';
+            if (sortFilter) sortFilter.value = 'score-desc';
+            const languageFilter = document.getElementById('language-filter');
+            if (languageFilter) languageFilter.value = 'original';
+
+            saveAnimeFilters();
+            renderAnimeByQuery();
+        });
+    }
+}
+
+const throttledAutoLoadMore = throttle(() => {
+    if (isFetching || !hasNextAnimePage) return;
+    if (!loadMoreContainer || loadMoreContainer.classList.contains('hidden')) return;
+
+    const triggerPoint = document.documentElement.scrollHeight - window.innerHeight - 220;
+    if (window.scrollY < triggerPoint) return;
+
+    currentPage += 1;
+    fetchTopAnime(currentPage, true);
+}, 1000);
 
 async function fetchTopAnime(page = 1, append = false) {
     if(isFetching) return;
@@ -94,13 +395,18 @@ async function fetchTopAnime(page = 1, append = false) {
     }
 
     try {
-        // Fetching top airing anime
-        let res = await fetch(`https://api.jikan.moe/v4/top/anime?filter=airing&limit=8&page=${page}`);
+        let apiUrl = `https://api.jikan.moe/v4/top/anime?filter=airing&limit=8&page=${page}`;
+        if (animeQueryState.search && animeQueryState.search.trim() !== '') {
+            apiUrl = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeQueryState.search.trim())}&limit=8&page=${page}&sfw=true`;
+        }
+
+        // Fetching anime
+        let res = await fetch(apiUrl);
         
         // Automatic retry with backoff for Jikan Rate Limits (429)
         if (res.status === 429) {
             await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2 seconds
-            res = await fetch(`https://api.jikan.moe/v4/top/anime?filter=airing&limit=8&page=${page}`);
+            res = await fetch(apiUrl);
         }
         
         if (!res.ok) throw new Error(`Jikan API Error: ${res.status}`);
@@ -116,9 +422,11 @@ async function fetchTopAnime(page = 1, append = false) {
         if (data.pagination && data.pagination.has_next_page) {
             if (loadMoreContainer) loadMoreContainer.classList.remove('hidden');
             if (nextBtn) nextBtn.disabled = false;
+            hasNextAnimePage = true;
         } else {
             if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
             if (nextBtn) nextBtn.disabled = true;
+            hasNextAnimePage = false;
         }
 
     } catch (error) {
@@ -158,6 +466,7 @@ async function fetchTopAnime(page = 1, append = false) {
         }
     } finally {
         isFetching = false;
+        hasNextAnimePage = nextBtn ? !nextBtn.disabled : false;
         if(loadMoreBtn && !loadMoreBtn.innerHTML.includes('RETRY')) {
             loadMoreBtn.innerHTML = 'LOAD MORE ANIME <i class="fa-solid fa-arrow-down"></i>';
             loadMoreBtn.disabled = false;
@@ -169,12 +478,20 @@ async function fetchTopAnime(page = 1, append = false) {
 window.fetchTopAnime = fetchTopAnime;
 
 function renderAnimeCards(animeList, append) {
-    animeGrid.classList.remove('hidden');
-
     if (!append) {
-        animeGrid.innerHTML = '';
-        animeGrid.style.minHeight = 'auto'; // Release height lock
+        loadedAnimeList = [...animeList];
+    } else {
+        loadedAnimeList = [...loadedAnimeList, ...animeList];
     }
+
+    updateGenreFilterOptions();
+    renderAnimeByQuery();
+}
+
+function renderAnimeCardsList(animeList) {
+    animeGrid.classList.remove('hidden');
+    animeGrid.innerHTML = '';
+    animeGrid.style.minHeight = 'auto'; // Release height lock
 
     const validAnime = animeList; // Removed filter to allow all anime to show, even without trailer. Fallback handles missing vid.
     const newCards = [];
@@ -224,24 +541,34 @@ function renderAnimeCards(animeList, append) {
     });
 
     // Trigger scroll animations for newly added cards
-    gsap.from(newCards, {
-        scrollTrigger: {
-            trigger: newCards[0] || "#discover",
-            start: "top 80%",
-        },
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out"
-    });
+    if (newCards.length > 0) {
+        gsap.from(newCards, {
+            scrollTrigger: {
+                trigger: newCards[0] || "#discover",
+                start: "top 80%",
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power3.out"
+        });
+    }
     
     ScrollTrigger.refresh();
 }
 
 if(loadMoreBtn) {
     loadMoreBtn.addEventListener('click', () => {
+        if (isFetching || !hasNextAnimePage) return;
+
         sounds.click();
+
+        // User request: remove sort filter when loading more pages.
+        animeQueryState.sort = 'none';
+        if (sortFilter) sortFilter.value = 'none';
+        saveAnimeFilters();
+
         currentPage++;
         fetchTopAnime(currentPage, true);
     });
@@ -266,6 +593,15 @@ if(nextBtn) {
         document.getElementById('discover').scrollIntoView({ behavior: 'smooth' });
     });
 }
+
+window.addEventListener('scroll', throttledAutoLoadMore, { passive: true });
+
+applySavedAnimeFiltersToState();
+syncAnimeControlsFromState();
+wireAnimeControls();
+
+// Initial load for discover section cards.
+fetchTopAnime(currentPage, false);
 
 // --- Player Modal & Real Episode Logic ---
 const modal = document.getElementById('player-modal');
@@ -366,7 +702,8 @@ function renderNativeFullscreenIframe(videoId, startTime = 0) {
     const iframe = document.createElement('iframe');
     const startParam = Math.max(0, Math.floor(startTime));
     const startQuery = startParam > 0 ? `&start=${startParam}` : '';
-    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=1${startQuery}`;
+    const originStr = window.location.protocol === 'file:' ? 'http://localhost' : window.location.origin;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=${encodeURIComponent(originStr)}${startQuery}`;
     iframe.className = 'w-full h-full';
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
@@ -415,7 +752,7 @@ function renderCustomYouTubePlayer(videoId, startTime = 0) {
                     autoplay: 1,
                     controls: 0,
                     enablejsapi: 1,
-                    origin: window.location.origin,
+                    origin: window.location.protocol === 'file:' ? 'http://localhost' : window.location.origin,
                     ...(startTime > 0 ? { start: Math.floor(startTime) } : {})
                 },
                 events: {
@@ -498,19 +835,15 @@ function loadVideoPlayer(trailerUrl, videoTitle = '', startTime = 0) {
     container.innerHTML = '';
     
     // Reset controls UI
-    const progressFilled = document.getElementById('player-progress-filled');
     const timeDisplay = document.getElementById('player-time');
     const playBtn = document.getElementById('player-play-btn');
     const ccBtn = document.getElementById('player-cc-btn');
     
-    if(progressFilled) progressFilled.style.width = '0%';
     if(timeDisplay) timeDisplay.innerText = "00:00 / 00:00";
     if(playBtn) playBtn.className = 'fa-solid fa-play hover:text-credacc cursor-pointer transition-colors';
     if(ccBtn) ccBtn.className = 'fa-solid fa-closed-captioning text-gray-600 hover:text-credacc cursor-pointer transition-colors';
 
     if (!trailerUrl || trailerUrl === 'null' || trailerUrl === 'undefined' || trailerUrl === '') {
-        const searchUrl = videoTitle ? `https://www.youtube.com/results?search_query=${encodeURIComponent(videoTitle + ' trailer')}` : 'https://www.youtube.com';
-        
         // --- Multi-Source Auto-Fallback Logic ---
         if (videoTitle && !window._isSearchingFallback) {
              container.innerHTML = `
@@ -547,7 +880,6 @@ function loadVideoPlayer(trailerUrl, videoTitle = '', startTime = 0) {
                     <p class="font-display text-2xl text-gray-400">NO STREAM AVAILABLE</p>
                     <div class="flex flex-col gap-2 items-center mt-4">
                          <p class="font-tech text-xs text-gray-500">TRAILER DATA MISSING FROM API</p>
-                         ${videoTitle ? `<a href="${searchUrl}" target="_blank" class="mt-2 px-4 py-2 border border-credacc text-credacc text-xs font-tech hover:bg-credacc hover:text-black transition-colors rounded uppercase"><i class="fa-brands fa-youtube mr-2"></i> SEARCH TRAILER</a>` : ''}
                     </div>
                 </div>
             `;
@@ -587,7 +919,8 @@ function fallbackIframe(container, videoId, startTime = 0, controls = 0) {
     const startParam = Math.max(0, Math.floor(startTime));
     const startQuery = startParam > 0 ? `&start=${startParam}` : '';
     const normalizedControls = Number(controls) === 1 ? 1 : 0;
-    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=${normalizedControls}&playsinline=1&enablejsapi=1${startQuery}`;
+    const originStr = window.location.protocol === 'file:' ? 'http://localhost' : window.location.origin;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=${normalizedControls}&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(originStr)}${startQuery}`;
     iframe.className = 'w-full h-full';
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
@@ -790,21 +1123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Seek
-    const progressContainer = document.getElementById('player-progress-container');
-    if(progressContainer) {
-        progressContainer.addEventListener('click', (e) => {
-            if(!player || typeof player.getDuration !== 'function') return;
-            const rect = progressContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const duration = player.getDuration();
-            
-            const newTime = (clickX / width) * duration;
-            player.seekTo(newTime, true);
-        });
-    }
-
     // Fullscreen
     const fsBtn = document.getElementById('player-fs-btn');
     if(fsBtn) {
@@ -849,9 +1167,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function getLanguageTrailerTarget(baseTitle = '', baseTrailerUrl = '') {
+    if (animeQueryState.language === 'original') {
+        return {
+            url: baseTrailerUrl,
+            title: baseTitle
+        };
+    }
+
+    const langSuffix = animeQueryState.language === 'hindi' ? 'hindi dub trailer' : 'english dub trailer';
+    return {
+        // Empty URL triggers in-app alternative trailer lookup flow.
+        url: '',
+        title: `${baseTitle} ${langSuffix}`.trim()
+    };
+}
+
 // Setup clicking interactions for fetched episodes
 function setupEpisodeInteractions(trailerUrl) {
-    const items = epListContainer.querySelectorAll('.episode-item');
+    const items = document.querySelectorAll('.episode-item');
     
     items.forEach(item => {
         item.addEventListener('click', function() {
@@ -870,8 +1204,28 @@ function setupEpisodeInteractions(trailerUrl) {
             this.classList.add('border-credacc', 'bg-white/10');
             this.insertAdjacentHTML('beforeend', '<i class="fa-solid fa-circle-play ml-auto text-credacc play-icon"></i>');
 
-            // Simulate Video Loading state
+            // Find episode data
+            const epNum = this.getAttribute('data-ep');
             const epTitle = this.getAttribute('title');
+            const animeTitle = document.getElementById('modal-title').textContent || '';
+            
+            // Generate trailer target based on current language choice.
+            const isMainFeature = epNum === '1' && epTitle === 'Main Feature';
+            let finalUrl = trailerUrl;
+            let finalTitle = animeTitle;
+
+            if (isMainFeature) {
+                finalTitle = animeTitle;
+            } else if (animeQueryState.language === 'original') {
+                finalTitle = `${animeTitle} ${epTitle}`;
+            } else {
+                const langTarget = getLanguageTrailerTarget(animeTitle, trailerUrl);
+                finalUrl = langTarget.url;
+                finalTitle = langTarget.title;
+            }
+
+            // Simulate Video Loading state
+            const videoContainer = document.getElementById('video-container');
             videoContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full w-full bg-black px-4 text-center">
                     <div class="loader ease-linear rounded-full border-4 border-t-4 border-zinc-700 h-16 w-16 mb-6"></div>
@@ -880,11 +1234,15 @@ function setupEpisodeInteractions(trailerUrl) {
                 </div>
             `;
 
-            // Reload the video
+            // Reload the video after simulating connection Delay
             setTimeout(() => {
-                const animeTitle = document.getElementById('modal-title').textContent || '';
-                loadVideoPlayer(trailerUrl, `${animeTitle} ${epTitle}`);
+                loadVideoPlayer(finalUrl, finalTitle);
             }, 1200);
+            
+            // Auto scroll to player if on mobile
+            if (window.innerWidth < 1024) {
+                 videoContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     });
 }
@@ -971,13 +1329,18 @@ function openModal(data) {
     document.getElementById('modal-score').textContent = data.score;
     document.getElementById('modal-status').textContent = data.status;
 
+    // Sync modal language filter
+    const modalLangFilter = document.getElementById('modal-language-filter');
+    if (modalLangFilter) modalLangFilter.value = animeQueryState.language || 'original';
+
     // Fetch Real Episodes using the stored Jikan ID and trailer
     if(epListContainer) {
         fetchAnimeEpisodes(data.id, data.trailer);
     }
 
-    // Load initial video
-    loadVideoPlayer(data.trailer, data.title);
+    // Load initial video respecting language selection.
+    const initialTarget = getLanguageTrailerTarget(data.title, data.trailer);
+    loadVideoPlayer(initialTarget.url, initialTarget.title);
 
     modal.classList.remove('hidden');
     // Small delay to allow display:block to apply before animating clip-path
@@ -1036,7 +1399,10 @@ const fallbackQuotes = [
     { anime: "Hunter x Hunter", character: "Gon Freecss", quote: "If you want to get to know someone, find out what makes them angry." },
     { anime: "Code Geass", character: "Lelouch vi Britannia", quote: "To defeat evil, I must become a greater evil." },
     { anime: "One Punch Man", character: "Saitama", quote: "I'll leave tomorrow's problems to tomorrow's me." },
-    { anime: "Steins;Gate", character: "Okabe Rintarou", quote: "No one knows what the future holds. That's why its potential is infinite." }
+    { anime: "Steins;Gate", character: "Okabe Rintarou", quote: "No one knows what the future holds. That's why its potential is infinite." },
+    { anime: "Demon Slayer", character: "Tanjiro Kamado", quote: "I can do it. I know I can do it. I’m the guy who gets it done, broken bones or not." },
+    { anime: "Doraemon", character: "Doraemon", quote: "You shouldn't be crying over those things that happened in the past." },
+    { anime: "Shinchan", character: "Shinnosuke Nohara", quote: "I'm a five year old kid!" }
 ];
 
 async function fetchRandomQuote() {
@@ -1617,7 +1983,7 @@ class TextPressure {
 
 // Initialize TextPressure for Discover Header
 window.addEventListener('load', () => {
-    const tp = new TextPressure('discover-pressure', {
+    new TextPressure('discover-pressure', {
         text: 'DISCOVER.',
         width: true,
         weight: true,
@@ -1641,130 +2007,6 @@ window.addEventListener('load', () => {
     }
 });
 
-// --- ScrollReveal Component logic ---
-class ScrollReveal {
-    constructor(elementId, options = {}) {
-        this.container = document.getElementById(elementId);
-        
-        if (!this.container) {
-            console.warn(`ScrollReveal: Element with id '${elementId}' not found.`);
-            return;
-        }
-
-        this.options = {
-            baseOpacity: 0.1,
-            enableBlur: true,
-            baseRotation: 3,
-            blurStrength: 4,
-            rotationEnd: 'bottom 40%', 
-            wordAnimationEnd: 'bottom 40%',
-            ...options
-        };
-
-        this.init();
-    }
-
-    init() {
-        // Prepare text structure
-        // Clean text content to avoid multiple spaces issues if any
-        const text = this.container.innerText.replace(/\s+/g, ' ').trim();
-        this.container.innerHTML = '';
-
-        const words = text.split(' ');
-        
-        words.forEach((word, index) => {
-            const span = document.createElement('span');
-            span.textContent = word + ' ';
-            span.className = 'reveal-word';
-            Object.assign(span.style, {
-                display: 'inline-block',
-                willChange: 'opacity, filter, transform',
-                opacity: this.options.baseOpacity // Set initial state here to avoid FOUC
-            });
-            
-            if(this.options.enableBlur) {
-                span.style.filter = `blur(${this.options.blurStrength}px)`;
-            }
-
-            this.container.appendChild(span);
-        });
-
-        // Initialize GSAP Animation
-        this.animate();
-    }
-
-    animate() {
-        const { baseRotation, baseOpacity, enableBlur, blurStrength, rotationEnd, wordAnimationEnd } = this.options;
-        const el = this.container;
-        const wordElements = el.querySelectorAll('.reveal-word');
-
-        // Kill previous triggers if re-initializing (not strictly needed here but good practice)
-        // ScrollTrigger.getAll().forEach(t => t.trigger === el && t.kill());
-
-        // 1. Container Rotation
-        gsap.fromTo(el, 
-            { transformOrigin: '50% 50%', rotate: baseRotation }, // Changed to center for better regular text flow feel
-            {
-                ease: 'none',
-                rotate: 0,
-                scrollTrigger: {
-                    trigger: el,
-                    // scroller: window, // default
-                    start: 'top bottom',
-                    end: rotationEnd,
-                    scrub: true
-                }
-            }
-        );
-
-        // 2. Word Opacity Stagger
-        gsap.fromTo(wordElements,
-            { opacity: baseOpacity },
-            {
-                ease: 'none',
-                opacity: 1,
-                stagger: 0.05,
-                scrollTrigger: {
-                    trigger: el,
-                    start: 'top bottom-=20%',
-                    end: wordAnimationEnd,
-                    scrub: true
-                }
-            }
-        );
-
-        // 3. Word Blur Stagger
-        if (enableBlur) {
-            gsap.fromTo(wordElements,
-                { filter: `blur(${blurStrength}px)` },
-                {
-                    ease: 'none',
-                    filter: 'blur(0px)',
-                    stagger: 0.05,
-                    scrollTrigger: {
-                        trigger: el,
-                        start: 'top bottom-=20%',
-                        end: wordAnimationEnd,
-                        scrub: true
-                    }
-                }
-            );
-        }
-    }
-}
-
-// Initialize ScrollReveal - DEPRECATED in favor of ScrollFloat
-// window.addEventListener('load', () => {
-    // new ScrollReveal('scroll-reveal-text', {
-    //     baseOpacity: 0.05,
-    //     enableBlur: true,
-    //     baseRotation: 2,
-    //     blurStrength: 10,
-    //     rotationEnd: 'top 60%',
-    //     wordAnimationEnd: 'bottom 60%'
-    // });
-// })
-
 // --- TARGET CURSOR COMPONENT ---
 class TargetCursorController {
     constructor(targetSelector = 'a, button, .cursor-target, .episode-item, .api-card, .hero-btn', options = {}) {
@@ -1786,19 +2028,10 @@ class TargetCursorController {
         this.targetCornerPositions = null;
         this.tickerFn = this.tickerFn.bind(this);
         
-        // Remove restrictive check to ensure cursor always loads
         this.init();
-    }
-    
-    // Legacy check retained but unused for init blocking
-    checkMobile() {
-        // Always return false to ensure cursor loads
-        this.isMobile = false;
-        return false;
     }
 
     init() {
-        // ALWAYS Create Cursor Elements if not present, regardless of device type for now to fix issues
         if (!document.querySelector('.target-cursor-wrapper')) {
             const wrapper = document.createElement('div');
             wrapper.className = 'target-cursor-wrapper';
@@ -1818,11 +2051,6 @@ class TargetCursorController {
             this.dot = this.cursor.querySelector('.target-cursor-dot');
             this.corners = Array.from(this.cursor.querySelectorAll('.target-cursor-corner'));
         }
-
-        // Force hide default cursor globally
-        const style = document.createElement('style');
-        style.innerHTML = '* { cursor: none !important; }';
-        document.head.appendChild(style);
 
         // Initial Set off-screen to prevent flash
         gsap.set(this.cursor, {
@@ -2023,10 +2251,6 @@ class TargetCursorController {
 const initCursor = () => {
     if(!document.querySelector('.target-cursor-wrapper')) {
         new TargetCursorController();
-        // Aggressively hide default cursor
-        const style = document.createElement('style');
-        style.innerHTML = '* { cursor: none !important; }';
-        document.head.appendChild(style);
     }
 };
 
@@ -2523,7 +2747,7 @@ class AnimatedList {
 
 // Initialize New Components
 window.addEventListener('load', () => {
-    // 1. ScrollFloat for the Quote (replacing old ScrollReveal or enhancing it)
+    // 1. ScrollFloat for the quote heading
     new ScrollFloat('#scroll-reveal-text', {
         animationDuration: 1,
         ease: 'back.inOut(2)',
@@ -2617,9 +2841,7 @@ class Dock {
                 const rect = itemObj.el.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const dist = Math.abs(this.mouseX - centerX);
-                
-                let scale = 1;
-                
+
                 if (dist < this.options.spread) {
                     // Simple cosine ease for smooth curve
                     const val = Math.cos((dist / this.options.spread) * (Math.PI / 2));
@@ -3184,13 +3406,29 @@ async function fetchTrailerFromKitsu(title) {
 
 // --- Combined Fallback Search ---
 async function findAlternativeTrailer(title) {
-    let url = await fetchTrailerFromAniList(title);
-    if(url) return url;
-    
-    // Try Kitsu as second option
-    console.log("AniList failed, trying Kitsu for:", title);
-    url = await fetchTrailerFromKitsu(title);
-    if(url) return url;
-    
+    const attempts = [];
+    const safeTitle = String(title || '').trim();
+    if (safeTitle) attempts.push(safeTitle);
+
+    // Language-aware fallback: try base title if "english/hindi dub trailer" query doesn't exist in APIs.
+    const baseTitle = safeTitle
+        .replace(/\b(hindi|english)\s+dub\b/ig, '')
+        .replace(/\btrailer\b/ig, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    if (baseTitle && !attempts.includes(baseTitle)) {
+        attempts.push(baseTitle);
+    }
+
+    for (const query of attempts) {
+        let url = await fetchTrailerFromAniList(query);
+        if (url) return url;
+
+        console.log("AniList failed, trying Kitsu for:", query);
+        url = await fetchTrailerFromKitsu(query);
+        if (url) return url;
+    }
+
     return null;
 }
